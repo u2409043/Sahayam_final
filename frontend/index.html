@@ -1,0 +1,2077 @@
+<title>Sahayam Ops</title>
+
+<style>
+/* ============================================================
+   TOKENS &mdash; Sahayam civic design system (backwater teal +
+   turmeric). A light, high-legibility palette built for crisis
+   conditions: old phones, bright sunlight, low literacy. This
+   replaces the earlier dark "monsoon night" ops-console theme --
+   there is now a single, permanent light theme, no toggle.
+   ============================================================ */
+:root{
+  color-scheme: light;
+  --bg: #EEF1E5;
+  --bg-grid: #E2E8D6;
+  --surface: #FFFFFF;
+  --surface-2: #E2E8D6;
+  --surface-3: #D3DDC4;
+  --border: #C9D2BC;
+  --border-soft: #DCE3D2;
+  --text: #142E29;
+  --text-dim: #3E5750;
+  --text-faint: #6C8478;
+
+  --accent: #14574C;
+  --accent-ink: #FFFFFF;
+  --accent-dim: #0C3A32;
+  --accent-tint: #DCE9E2;
+
+  --critical: #AD3226;
+  --critical-bg: #F6DBD6;
+  --high: #D3652C;
+  --high-bg: #FBE4D6;
+  --medium: #DA9F35;
+  --medium-bg: #FBF0DA;
+  --low: #5E8A66;
+  --low-bg: #E4EEE2;
+
+  --sms: #3D5A8A;
+  --sms-bg: #DCE3F0;
+
+  --shadow: 0 1px 2px rgba(20,46,41,0.06), 0 6px 16px rgba(20,46,41,0.07);
+  --radius: 10px;
+  --radius-sm: 6px;
+}
+
+*{ box-sizing: border-box; }
+html, body{ height: 100%; }
+body{
+  margin:0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Manrope', 'Noto Sans Malayalam', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+h1,h2,h3,h4{ font-family:'Manrope', system-ui, sans-serif; margin:0; letter-spacing:-0.01em; font-weight:800; color: var(--accent-dim); }
+p{ margin:0; }
+button{ font-family: inherit; }
+.mono{ font-family: ui-monospace, 'SFMono-Regular', Menlo, monospace; }
+::selection{ background: var(--accent); color: var(--accent-ink); }
+
+*::-webkit-scrollbar{ width:8px; height:8px; }
+*::-webkit-scrollbar-track{ background: transparent; }
+*::-webkit-scrollbar-thumb{ background: var(--border); border-radius:8px; }
+
+/* ---------------- layout shell ---------------- */
+#root{ min-height: 100%; display:flex; flex-direction:column; }
+
+.header{
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 40;
+  display:flex; align-items:center; gap:16px;
+  padding: 12px clamp(16px,3vw,28px);
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border-soft);
+  flex-wrap: wrap;
+}
+.brand{ display:flex; align-items:center; gap:10px; margin-right:6px; }
+.brand-mark{
+  width:34px; height:34px; border-radius:9px;
+  background: linear-gradient(155deg, var(--accent), var(--accent-dim));
+  display:flex; align-items:center; justify-content:center;
+  color: var(--accent-ink); font-weight:800; font-size:15px; flex-shrink:0;
+  box-shadow: var(--shadow);
+}
+.brand-text{ display:flex; flex-direction:column; line-height:1.15; }
+.brand-text b{ font-family:'Manrope'; font-weight:800; font-size:16px; }
+.brand-text span{ font-size:11px; color:var(--text-dim); font-weight:600; letter-spacing:0.02em; }
+
+.view-tabs{
+  display:flex; background: var(--surface-2); border:1px solid var(--border);
+  border-radius: 999px; padding:3px; gap:2px;
+}
+.view-tab{
+  border:none; background:transparent; color:var(--text-dim);
+  padding:7px 14px; border-radius:999px; font-weight:700; font-size:13px;
+  cursor:pointer; display:flex; align-items:center; gap:6px; transition: all .15s ease;
+  white-space: nowrap;
+}
+.view-tab.active{ background: var(--accent); color: var(--accent-ink); }
+.view-tab:not(.active):hover{ color: var(--text); }
+
+.header-spacer{ flex:1; }
+
+.net-toggle{
+  display:flex; align-items:center; gap:8px;
+  background: var(--surface-2); border:1px solid var(--border);
+  border-radius:999px; padding:5px 6px 5px 12px; cursor:pointer;
+  transition: border-color .15s ease;
+}
+.net-toggle:hover{ border-color: var(--text-faint); }
+.net-dot{ width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+.net-dot.online{ background: var(--low); box-shadow: 0 0 0 3px color-mix(in srgb, var(--low) 25%, transparent); }
+.net-dot.sms{ background: var(--sms); animation: pulse 1.4s ease-in-out infinite; }
+@keyframes pulse{ 0%,100%{ box-shadow:0 0 0 0 color-mix(in srgb, var(--sms) 45%, transparent);} 50%{ box-shadow:0 0 0 6px transparent;} }
+.net-label{ font-size:12.5px; font-weight:700; color:var(--text); }
+.net-switch{
+  width:34px; height:20px; border-radius:999px; background:var(--surface-3);
+  position:relative; border:1px solid var(--border);
+}
+.net-switch::after{
+  content:''; position:absolute; top:1px; left:1px; width:16px; height:16px;
+  border-radius:50%; background: var(--text-dim); transition: transform .18s ease, background .18s ease;
+}
+.net-toggle.sms .net-switch::after{ transform: translateX(14px); background: var(--sms); }
+
+.clock{ font-size:12px; color:var(--text-faint); font-weight:600; min-width:78px; text-align:right; }
+
+.user-chip{
+  display:flex; align-items:center; gap:6px; padding:5px 6px 5px 10px; border-radius:20px;
+  background: var(--surface-2); border:1px solid var(--border); color:var(--text-dim);
+  font-size:11.5px; font-weight:700; flex-shrink:0; white-space:nowrap;
+}
+.user-chip-logout{
+  width:20px; height:20px; border-radius:50%; border:none; background:transparent; color:var(--text-faint);
+  display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;
+}
+.user-chip-logout:hover{ background: var(--surface-3); color:var(--critical); }
+
+/* ---------------- login gate ---------------- */
+.login-shell{ max-width:380px; margin:40px auto; padding:0 16px; }
+.login-shell .card{ padding:26px 22px; }
+.login-icon{
+  width:44px; height:44px; border-radius:12px; background: var(--accent); color: var(--accent-ink);
+  display:flex; align-items:center; justify-content:center; margin-bottom:14px;
+}
+.login-shell h2{ font-size:18px; margin-bottom:4px; }
+.login-shell .sub{ color:var(--text-dim); font-size:12.5px; margin-bottom:18px; }
+.login-error{
+  background: var(--critical-bg); color: var(--critical); font-size:12px; font-weight:700;
+  padding:9px 11px; border-radius: var(--radius-sm); margin-bottom:12px;
+}
+.login-hint{
+  margin-top:16px; padding-top:14px; border-top:1px dashed var(--border); font-size:11px; color:var(--text-faint);
+  line-height:1.6;
+}
+.login-hint b{ color:var(--text-dim); }
+
+/* ---------------- sms fallback banner ---------------- */
+.sms-banner{
+  display:flex; align-items:center; gap:10px; justify-content:center; flex-wrap:wrap; text-align:center;
+  background: var(--sms-bg); color: var(--sms); font-weight:700; font-size:12.5px;
+  padding:8px 16px; border-bottom:1px solid var(--border-soft);
+}
+.sms-banner .mono{ font-weight:500; color: var(--text-dim); }
+
+/* ---------------- main containers ---------------- */
+.main{ flex:1; width:100%; max-width:1400px; margin:0 auto; padding: 20px clamp(16px,3vw,28px) 70px; }
+.admin-grid{ display:grid; grid-template-columns: 1.5fr 1fr; gap:18px; align-items:start; }
+.admin-grid-lower{ display:grid; grid-template-columns: 1fr 1fr; gap:18px; margin-top:18px; }
+@media (max-width: 980px){
+  .admin-grid, .admin-grid-lower{ grid-template-columns: 1fr; }
+}
+
+.card{
+  background: var(--surface); border:1.5px solid var(--border); border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+.card-head{
+  display:flex; align-items:center; gap:10px; padding:14px 16px; border-bottom:1px solid var(--border-soft);
+}
+.card-head h3{ font-size:14px; font-weight:800; }
+.card-head .sub{ font-size:11.5px; color:var(--text-faint); font-weight:600; }
+.card-head-spacer{ flex:1; }
+.card-body{ padding:16px; }
+
+/* ---------------- metric tiles ---------------- */
+.metrics{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:18px; }
+@media (max-width: 700px){ .metrics{ grid-template-columns:repeat(2,1fr); } }
+.metric{
+  background: var(--surface); border:1px solid var(--border-soft); border-radius: var(--radius);
+  padding:14px 16px; box-shadow: var(--shadow); position:relative; overflow:hidden;
+}
+.metric .icon-wrap{
+  width:30px; height:30px; border-radius:8px; display:flex; align-items:center; justify-content:center;
+  margin-bottom:10px;
+}
+.metric .num{ font-family:'Manrope'; font-size:26px; font-weight:800; line-height:1; font-variant-numeric: tabular-nums; }
+.metric .label{ font-size:11.5px; color:var(--text-dim); font-weight:700; margin-top:4px; }
+
+/* ---------------- kerala map ---------------- */
+.map-wrap{ padding:10px; overflow:hidden; }
+.map-svg{ width:100%; height:auto; display:block; max-height: 74vh; overflow:hidden; }
+.map-svg.pickable{ cursor: crosshair; }
+.map-zoom-group{ transition: transform 480ms cubic-bezier(0.22, 1, 0.36, 1); }
+.district-shape{ cursor:pointer; transition: filter .15s ease, opacity .15s ease; stroke:var(--bg); stroke-width:1.1; }
+.district-shape:hover{ filter: brightness(1.2); }
+.district-shape.dimmed{ opacity:0.22; }
+.district-shape.static{ cursor:default; }
+.district-label{ font-family:'Manrope'; font-weight:800; font-size:8.6px; fill: var(--text); pointer-events:none; }
+.district-label-sub{ font-family:'IBM Plex Mono'; font-weight:500; font-size:5.6px; fill: color-mix(in srgb, var(--text) 60%, transparent); pointer-events:none; }
+.req-marker{ cursor:pointer; }
+.req-marker.static{ cursor: default; }
+.req-marker circle.pulse{ animation: markerpulse 1.8s ease-out infinite; transform-origin: center; }
+@keyframes markerpulse{ 0%{ r:5; opacity:0.55;} 100%{ r:15; opacity:0;} }
+.pin-marker circle.pulse{ animation: markerpulse 1.6s ease-out infinite; transform-origin: center; }
+.hotspot-cluster{ pointer-events:none; }
+.hotspot-ring{ fill:none; stroke: var(--critical); stroke-width:1; opacity:0.4; animation: hotspotpulse 2.4s ease-out infinite; transform-origin: center; }
+@keyframes hotspotpulse{ 0%{ r:10; opacity:0.5; } 100%{ r:26; opacity:0; } }
+.hotspot-label{ font-family:'IBM Plex Mono'; font-weight:700; font-size:5.4px; fill: var(--critical); }
+.legend{ display:flex; flex-wrap:wrap; gap:12px; padding:0 16px 14px; }
+.legend-item{ display:flex; align-items:center; gap:6px; font-size:10.5px; color:var(--text-dim); font-weight:700; }
+.legend-swatch{ width:10px; height:10px; border-radius:3px; }
+.map-filter-chip{
+  display:inline-flex; align-items:center; gap:6px; background: var(--accent); color:var(--accent-ink);
+  border-radius:999px; padding:5px 8px 5px 12px; font-size:12px; font-weight:800; cursor:pointer; border:none;
+}
+
+/* ---------------- priority queue ---------------- */
+.queue-list{ display:flex; flex-direction:column; gap:8px; max-height:520px; overflow-y:auto; padding-right:2px; }
+.req-row{
+  display:flex; gap:10px; align-items:flex-start; padding:11px 12px; border-radius: var(--radius-sm);
+  border:1px solid var(--border-soft); background: var(--surface-2);
+}
+.pri-stripe{ width:4px; align-self:stretch; border-radius:3px; flex-shrink:0; }
+.req-row-body{ flex:1; min-width:0; }
+.req-row-top{ display:flex; align-items:center; gap:8px; margin-bottom:3px; flex-wrap:wrap; }
+.pri-pill{
+  font-size:10px; font-weight:800; padding:2px 7px; border-radius:5px; letter-spacing:0.02em; white-space:nowrap;
+}
+.req-row-title{ font-size:13px; font-weight:700; color:var(--text); }
+.req-row-meta{ font-size:11px; color:var(--text-faint); font-weight:600; display:flex; gap:8px; flex-wrap:wrap; margin-top:4px; }
+.req-row-desc{ font-size:12px; color:var(--text-dim); margin-top:3px; line-height:1.4; }
+.status-pill{
+  font-size:10px; font-weight:800; padding:3px 8px; border-radius:999px; white-space:nowrap; flex-shrink:0;
+  background: var(--surface-3); color: var(--text-dim); border:1px solid var(--border);
+}
+.channel-tag{ display:inline-flex; align-items:center; gap:3px; }
+
+/* ---------------- forms ---------------- */
+.field{ margin-bottom:12px; }
+.field label{ display:block; font-size:11.5px; font-weight:800; color:var(--text-dim); margin-bottom:5px; letter-spacing:0.01em; }
+.field input, .field select, .field textarea{
+  width:100%; background: #fff; border:1.5px solid var(--border); color:var(--text);
+  border-radius: var(--radius-sm); padding:9px 11px; font-size:13px; font-family:inherit;
+}
+.field input:focus, .field select:focus, .field textarea:focus{
+  outline:3px solid var(--accent-tint); outline-offset:0; border-color:var(--accent);
+}
+.field-row{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.pri-select{ display:flex; gap:6px; flex-wrap:wrap; }
+.pri-opt{
+  flex:1; min-width:70px; text-align:center; padding:8px 6px; border-radius: var(--radius-sm);
+  border:1.5px solid var(--border); background:var(--surface-2); cursor:pointer; font-size:11.5px; font-weight:800;
+  color:var(--text-dim); transition: all .12s ease;
+}
+.pri-opt.active{ color: #fff; border-color: transparent; }
+
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:7px;
+  border-radius: var(--radius-sm); border:1.5px solid transparent; font-weight:700; font-size:13px; cursor:pointer;
+  padding:10px 16px; transition: transform .08s ease, background .15s ease, border-color .15s ease;
+}
+.btn:active{ transform: scale(0.98); }
+.btn:disabled{ opacity:0.5; cursor:not-allowed; }
+.btn-primary{ background: var(--accent); color: var(--accent-ink); }
+.btn-primary:hover:not(:disabled){ background: var(--accent-dim); }
+.btn-block{ width:100%; }
+.btn-ghost{ background: transparent; color:var(--text); border-color:var(--border); }
+.btn-ghost:hover{ border-color: var(--accent); color: var(--accent); }
+.btn-sm{ padding:7px 11px; font-size:12px; }
+
+/* ---------------- zone management ---------------- */
+.zone-mgmt-list{ max-height: 420px; overflow-y:auto; }
+.zone-mgmt-row{
+  display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid var(--border-soft);
+}
+.zone-mgmt-row:last-child{ border-bottom:none; }
+.zone-mgmt-dot{ width:10px; height:10px; border-radius:3px; flex-shrink:0; }
+.zone-mgmt-name{ flex:1; font-size:13px; font-weight:700; cursor: pointer; }
+.zone-mgmt-count{ font-size:11px; color:var(--text-faint); font-weight:600; }
+.sev-select{
+  background: var(--surface-2); border:1px solid var(--border); color:var(--text);
+  border-radius:6px; padding:5px 8px; font-size:11.5px; font-weight:700;
+}
+
+/* ---------------- volunteer view ---------------- */
+.vshell{ max-width:520px; margin:0 auto; padding: 16px clamp(16px,4vw,20px) 80px; }
+.v-profile{
+  display:flex; align-items:center; gap:12px; padding:14px 16px; margin-bottom:14px;
+}
+.v-avatar{
+  width:44px; height:44px; border-radius:50%; background: linear-gradient(155deg, var(--accent), var(--accent-dim));
+  display:flex; align-items:center; justify-content:center; font-weight:800; color:var(--accent-ink); flex-shrink:0;
+}
+.v-name{ font-weight:800; font-size:15px; }
+.v-sub{ font-size:11.5px; color:var(--text-dim); font-weight:600; margin-top:1px; }
+.v-status-select{ margin-left:auto; }
+
+.v-stats{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:16px; }
+.v-stat{ background:var(--surface); border:1px solid var(--border-soft); border-radius:var(--radius-sm); padding:10px; text-align:center; }
+.v-stat .n{ font-family:'Manrope'; font-weight:800; font-size:18px; }
+.v-stat .l{ font-size:10px; color:var(--text-faint); font-weight:700; margin-top:2px; }
+
+.section-title{ display:flex; align-items:center; gap:8px; margin: 18px 0 10px; }
+.section-title h3{ font-size:13px; font-weight:800; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.04em; }
+
+.task-card{
+  background: var(--surface); border:1px solid var(--border-soft); border-radius: var(--radius);
+  padding:14px; margin-bottom:12px; box-shadow: var(--shadow);
+}
+.task-top{ display:flex; align-items:flex-start; gap:10px; margin-bottom:8px; }
+.task-pri-badge{
+  width:36px; height:36px; border-radius:9px; display:flex; align-items:center; justify-content:center;
+  flex-shrink:0;
+}
+.task-title{ font-size:14px; font-weight:800; line-height:1.3; }
+.task-loc{ font-size:11.5px; color:var(--text-faint); font-weight:600; margin-top:2px; display:flex; align-items:center; gap:4px; }
+.task-desc{ font-size:12.5px; color:var(--text-dim); line-height:1.5; margin: 8px 0 10px; }
+.task-meta-row{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
+.task-meta{ display:flex; align-items:center; gap:4px; font-size:11px; color:var(--text-faint); font-weight:700; }
+.status-steps{ display:flex; gap:6px; }
+.status-step{
+  flex:1; padding:9px 4px; border-radius: var(--radius-sm); border:1.5px solid var(--border);
+  background: var(--surface-2); font-size:11px; font-weight:800; color:var(--text-dim); text-align:center; cursor:pointer;
+  transition: all .12s ease;
+}
+.status-step.done{ background: var(--low); border-color: var(--low); color:#0C1917; }
+.status-step.current{ border-color: var(--accent); color:var(--accent); }
+.status-step:disabled{ cursor:default; opacity:0.55; }
+
+.sms-payload-card{
+  background: var(--sms-bg); border:1px solid color-mix(in srgb, var(--sms) 40%, var(--border));
+  border-radius: var(--radius); padding:14px; margin-bottom:12px;
+}
+.sms-payload-head{ display:flex; align-items:center; gap:7px; margin-bottom:8px; color:var(--sms); font-weight:800; font-size:11.5px; }
+.sms-json{
+  background: var(--bg); border-radius:7px; padding:10px 12px; font-size:11px; line-height:1.65;
+  overflow-x:auto; color: var(--text-dim);
+}
+.sms-json .k{ color: var(--sms); }
+.sms-json .v{ color: var(--text); }
+.sms-actions{ display:flex; gap:8px; margin-top:10px; }
+
+.empty-state{
+  text-align:center; padding:36px 20px; color:var(--text-faint);
+}
+.empty-state svg{ margin-bottom:10px; opacity:0.5; }
+.empty-state p{ font-size:12.5px; font-weight:600; }
+
+.filter-banner{
+  display:flex; align-items:center; gap:10px; background: var(--surface-2); border:1px solid var(--border);
+  border-radius: var(--radius-sm); padding:9px 12px; margin-bottom:14px; font-size:12.5px; font-weight:700;
+}
+
+.badge-count{
+  display:inline-flex; align-items:center; justify-content:center; min-width:18px; height:18px; padding:0 5px;
+  border-radius:999px; background: var(--critical); color:#fff; font-size:10px; font-weight:800;
+}
+
+.mobile-view-bar{ display:none; }
+@media (max-width: 760px){
+  .header .view-tabs{ display:none; }
+  .mobile-view-bar{
+    display:flex; gap:2px; background:var(--surface-2); border-top:1px solid var(--border-soft);
+    position: sticky; bottom: env(safe-area-inset-bottom, 0px); z-index:40; padding:6px;
+  }
+  .mobile-view-bar button{
+    flex:1; background:transparent; border:none; color:var(--text-dim); font-weight:800; font-size:11px;
+    padding:8px 2px; border-radius:8px; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:3px;
+  }
+  .mobile-view-bar button.active{ background: var(--surface-3); color:var(--accent); }
+  .clock{ display:none; }
+}
+
+/* ---------------- citizen view ---------------- */
+.cshell{ max-width:560px; margin:0 auto; padding: 20px clamp(16px,4vw,20px) 80px; }
+.c-hero{ margin-bottom:18px; }
+.c-hero h1{ font-size: clamp(21px,5vw,27px); margin-bottom:6px; }
+.c-hero p{ color:var(--text-dim); font-size:13.5px; line-height:1.5; }
+
+.pin-hint{
+  display:flex; align-items:center; gap:8px; font-size:12.5px; font-weight:700; color:var(--text-dim);
+  padding:10px 12px; background: var(--surface-2); border:1px solid var(--border); border-radius: var(--radius-sm);
+  margin-bottom:10px;
+}
+.pin-hint.set{ color: var(--accent); border-color: var(--accent); }
+.pin-hint .btn{ flex-shrink:0; }
+.geo-note{ font-size:11px; color: var(--text-faint); margin:-4px 0 10px; padding:0 2px; }
+
+.cat-grid{ display:grid; grid-template-columns:repeat(5,1fr); gap:7px; }
+@media (max-width: 480px){ .cat-grid{ grid-template-columns:repeat(3,1fr); } }
+.cat-chip{
+  display:flex; flex-direction:column; align-items:center; gap:5px; padding:10px 4px; border-radius: var(--radius-sm);
+  border:1.5px solid var(--border); background:var(--surface-2); cursor:pointer; font-size:10.5px; font-weight:800;
+  color:var(--text-dim); transition: all .12s ease; text-align:center;
+}
+.cat-chip.active{ border-color: var(--accent); color:var(--accent); background: color-mix(in srgb, var(--accent) 14%, var(--surface-2)); }
+
+.vuln-grid{ display:flex; flex-wrap:wrap; gap:8px; }
+.vuln-chip{
+  display:flex; align-items:center; gap:6px; padding:9px 13px; border-radius:999px; border:1.5px solid var(--border);
+  background:var(--surface-2); cursor:pointer; font-size:12px; font-weight:700; color:var(--text-dim);
+}
+.vuln-chip.active{ border-color: var(--high); color: var(--high); background: color-mix(in srgb, var(--high) 14%, var(--surface-2)); }
+
+.confirm-panel{ padding:22px; text-align:center; }
+.confirm-panel .pri-pill{ font-size:13px; padding:6px 14px; margin-bottom:10px; display:inline-flex; }
+.confirm-panel h2{ font-size:18px; margin-bottom:6px; }
+.confirm-panel p{ color:var(--text-dim); font-size:13px; margin-bottom:4px; }
+.confirm-stat-row{ display:flex; justify-content:center; gap:22px; margin:16px 0; }
+.confirm-stat{ text-align:center; }
+.confirm-stat .n{ font-family:'Manrope'; font-size:20px; font-weight:800; }
+.confirm-stat .l{ font-size:10px; color:var(--text-faint); font-weight:700; margin-top:2px; }
+
+.my-report-row{
+  display:flex; align-items:center; gap:10px; padding:11px 12px; border-radius:var(--radius-sm);
+  border:1px solid var(--border-soft); background: var(--surface-2); margin-bottom:8px;
+}
+.my-report-row .desc{ flex:1; min-width:0; font-size:12.5px; color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.my-report-row .meta{ font-size:10.5px; color:var(--text-faint); font-weight:600; margin-top:2px; }
+</style>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Noto+Sans+Malayalam:wght@500;700;800&display=swap" rel="stylesheet">
+
+<div id="root"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.24.7/babel.min.js"></script>
+
+<script type="text/babel" data-presets="react">
+const { useState, useEffect, useMemo, useCallback, createContext, useContext, useRef } = React;
+
+/* ============================================================
+   ICONS &mdash; small inline set, Lucide-style strokes
+   ============================================================ */
+const Icon = ({ path, size = 16, ...props }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
+       strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    {path}
+  </svg>
+);
+const IconUsers = (p) => <Icon {...p} path={<>
+  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+  <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+</>} />;
+const IconAlert = (p) => <Icon {...p} path={<>
+  <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/>
+  <line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/>
+</>} />;
+const IconCheck = (p) => <Icon {...p} path={<path d="M20 6 9 17l-5-5"/>} />;
+const IconCheckCircle = (p) => <Icon {...p} path={<>
+  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/>
+</>} />;
+const IconClock = (p) => <Icon {...p} path={<><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></>} />;
+const IconMapPin = (p) => <Icon {...p} path={<>
+  <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>
+</>} />;
+const IconRadio = (p) => <Icon {...p} path={<>
+  <path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9"/><path d="M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5"/>
+  <circle cx="12" cy="12" r="2"/><path d="M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5"/><path d="M19.1 4.9C23 8.8 23 15.1 19.1 19"/>
+</>} />;
+const IconPhone = (p) => <Icon {...p} path={<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>} />;
+const IconSend = (p) => <Icon {...p} path={<><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></>} />;
+const IconMap = (p) => <Icon {...p} path={<>
+  <path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3Z"/><path d="M9 3v15"/><path d="M15 6v15"/>
+</>} />;
+const IconLayers = (p) => <Icon {...p} path={<>
+  <path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/>
+  <path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/>
+</>} />;
+const IconSun = (p) => <Icon {...p} path={<>
+  <circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>
+</>} />;
+const IconMoon = (p) => <Icon {...p} path={<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>} />;
+const IconInbox = (p) => <Icon {...p} path={<>
+  <polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/>
+  <path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11Z"/>
+</>} />;
+const IconNavigation = (p) => <Icon {...p} path={<path d="M3 11l19-9-9 19-2-8-8-2Z"/>} />;
+const IconWifi = (p) => <Icon {...p} path={<>
+  <path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/>
+  <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/>
+</>} />;
+const IconShield = (p) => <Icon {...p} path={<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/>} />;
+const IconLifeBuoy = (p) => <Icon {...p} path={<>
+  <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/>
+  <line x1="4.93" y1="4.93" x2="9.17" y2="9.17"/><line x1="14.83" y1="14.83" x2="19.07" y2="19.07"/>
+  <line x1="14.83" y1="9.17" x2="19.07" y2="4.93"/><line x1="4.93" y1="19.07" x2="9.17" y2="14.83"/>
+</>} />;
+const IconDroplet = (p) => <Icon {...p} path={<path d="M12 2.69s-5.66 6.83-5.66 10.53a5.66 5.66 0 0 0 11.32 0c0-3.7-5.66-10.53-5.66-10.53Z"/>} />;
+const IconHome = (p) => <Icon {...p} path={<>
+  <path d="M3 9.5 12 3l9 6.5"/><path d="M5 10.5V20a1 1 0 0 0 1 1h3v-6h6v6h3a1 1 0 0 0 1-1v-9.5"/>
+</>} />;
+const IconLogOut = (p) => <Icon {...p} path={<>
+  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/>
+</>} />;
+const IconLock = (p) => <Icon {...p} path={<>
+  <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+</>} />;
+const IconUser = (p) => <Icon {...p} path={<>
+  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+</>} />;
+const IconCross = (p) => <Icon {...p} path={<>
+  <rect x="3" y="3" width="18" height="18" rx="5"/><path d="M12 8v8M8 12h8"/>
+</>} />;
+
+/* ============================================================
+   KERALA MAP DATA (real district boundaries, projected)
+   ============================================================ */
+// Real Kerala district boundaries, projected to a 0..408.0 x 0..711.9 viewBox
+// Source: udit-001/india-maps-data (2011 census district boundaries), equirectangular projection
+const KERALA_VB = { w: 408.0, h: 711.9 };
+const KERALA_PROJ = { minLng: 74.867656, maxLat: 12.795156066620596, cosMean: 0.9831152375948073, scale: 151.89683452814313, pad: 14.0 };
+const KERALA_DISTRICTS = [
+  { id: 'kasaragod', name: 'Kasaragod', note: 'Northern coastal belt', severity: 'Low', cx: 56.5, cy: 64.5,
+    d: 'M 95.65,90.74 L 92.30,90.68 L 85.32,94.26 L 78.39,93.86 L 76.68,95.22 L 76.96,99.36 L 71.40,101.58 L 68.49,101.18 L 64.09,105.84 L 59.69,106.01 L 63.10,113.50 L 61.84,115.20 L 62.33,117.53 L 61.84,120.14 L 61.73,120.25 L 60.13,119.29 L 58.48,121.16 L 52.71,104.02 L 40.01,75.75 L 35.99,71.27 L 29.89,58.67 L 27.25,50.44 L 26.98,51.35 L 24.56,44.93 L 26.92,42.83 L 25.05,42.49 L 24.72,44.31 L 23.62,41.58 L 26.32,38.12 L 23.02,41.87 L 17.02,27.28 L 19.72,29.27 L 17.63,26.66 L 16.64,27.00 L 14.00,20.64 L 14.22,19.51 L 16.20,20.24 L 23.73,16.21 L 28.41,16.27 L 29.07,16.84 L 30.50,16.33 L 31.21,16.10 L 31.87,15.82 L 32.09,14.17 L 32.20,14.00 L 33.52,15.36 L 34.18,14.62 L 34.29,14.62 L 35.17,18.20 L 31.16,22.63 L 35.44,24.22 L 33.90,26.09 L 41.27,25.52 L 41.93,29.27 L 39.68,30.46 L 40.72,33.52 L 44.13,33.92 L 46.50,32.45 L 46.50,27.62 L 49.52,28.76 L 50.45,31.37 L 53.64,32.33 L 56.56,31.14 L 56.17,32.45 L 57.71,32.79 L 54.30,36.87 L 57.82,40.45 L 63.87,39.26 L 63.38,41.64 L 65.03,43.40 L 63.71,45.33 L 64.92,44.82 L 66.68,48.45 L 69.26,48.45 L 74.59,41.07 L 75.36,41.02 L 80.26,44.99 L 82.35,44.82 L 80.75,47.60 L 77.01,46.07 L 76.13,48.06 L 74.37,48.17 L 74.04,51.29 L 75.58,55.15 L 78.99,55.38 L 79.21,58.33 L 83.39,58.90 L 84.00,64.29 L 87.51,64.12 L 89.33,62.36 L 88.67,60.09 L 90.81,58.50 L 95.87,58.90 L 96.53,60.77 L 96.86,62.98 L 92.52,66.22 L 88.45,65.25 L 88.39,65.25 L 88.39,72.18 L 90.37,75.19 L 96.70,78.14 L 95.05,82.05 L 98.24,87.90 L 98.02,88.13 L 95.65,90.74 Z' },
+  { id: 'wayanad', name: 'Wayanad', note: 'Landslide-prone highland', severity: 'Severe', cx: 197.5, cy: 178.4,
+    d: 'M 173.62,143.75 L 173.68,143.64 L 183.57,145.17 L 193.58,139.78 L 200.07,137.85 L 199.90,138.02 L 199.96,156.29 L 201.00,157.49 L 206.39,154.48 L 211.51,154.31 L 214.09,155.78 L 214.42,161.00 L 216.51,163.90 L 219.75,164.69 L 224.92,163.28 L 229.05,167.48 L 230.64,172.53 L 234.71,174.17 L 235.70,174.51 L 244.88,171.45 L 244.39,173.83 L 244.39,173.89 L 244.39,173.89 L 246.92,176.39 L 243.34,178.66 L 243.45,179.05 L 245.32,184.56 L 245.32,184.62 L 245.38,184.62 L 249.39,188.36 L 247.63,190.80 L 241.03,191.03 L 239.55,195.23 L 234.10,197.44 L 234.05,197.44 L 233.22,196.20 L 228.22,199.88 L 227.29,197.05 L 224.76,195.40 L 218.10,200.28 L 217.94,200.40 L 218.54,201.47 L 220.47,206.64 L 218.05,206.53 L 218.05,206.53 L 218.05,206.53 L 216.56,209.42 L 212.00,210.95 L 211.62,211.07 L 211.56,211.52 L 210.85,214.87 L 204.41,218.22 L 201.50,214.87 L 196.05,212.77 L 196.60,209.31 L 194.74,207.55 L 194.74,207.55 L 188.58,210.38 L 179.06,203.80 L 175.82,198.41 L 169.50,195.57 L 167.68,189.16 L 168.18,184.11 L 170.43,181.89 L 160.75,180.02 L 154.76,173.95 L 152.07,173.89 L 153.17,172.41 L 150.75,171.28 L 152.34,166.74 L 149.10,164.86 L 152.67,162.48 L 152.89,162.42 L 152.84,162.42 L 151.74,158.96 L 154.54,156.69 L 172.19,158.73 L 172.80,156.41 L 169.83,153.91 L 173.57,151.47 L 172.52,147.72 L 172.14,146.36 L 173.24,144.49 L 174.06,143.81 L 173.62,143.75 Z' },
+  { id: 'kozhikode', name: 'Kozhikode', note: 'Coastal urban belt', severity: 'Moderate', cx: 158.1, cy: 212.9,
+    d: 'M 152.34,166.74 L 150.75,171.28 L 153.17,172.41 L 152.07,173.89 L 154.76,173.95 L 160.75,180.02 L 170.43,181.89 L 168.18,184.11 L 167.68,189.16 L 169.50,195.57 L 175.82,198.41 L 179.06,203.80 L 188.58,210.38 L 194.74,207.55 L 194.74,207.55 L 196.60,209.31 L 196.05,212.77 L 201.50,214.87 L 204.41,218.22 L 204.41,218.22 L 204.36,223.04 L 202.71,221.91 L 200.67,224.74 L 198.80,224.52 L 198.03,227.92 L 196.82,233.26 L 196.88,233.26 L 200.62,235.59 L 200.12,238.93 L 195.56,240.07 L 189.84,246.60 L 185.11,246.14 L 182.14,247.85 L 179.28,245.97 L 170.87,250.91 L 168.23,250.00 L 167.74,251.88 L 161.63,255.62 L 162.46,258.12 L 165.87,258.69 L 166.36,260.62 L 162.90,260.73 L 161.03,263.51 L 162.02,265.33 L 159.98,265.10 L 157.13,268.05 L 153.88,262.89 L 154.60,261.92 L 145.52,238.31 L 143.76,237.29 L 143.05,232.58 L 137.99,222.08 L 132.93,216.40 L 128.42,216.46 L 126.06,214.19 L 113.91,181.27 L 116.38,179.96 L 118.80,184.22 L 123.42,182.46 L 121.55,178.54 L 133.21,171.56 L 137.00,165.38 L 140.74,165.72 L 142.61,168.27 L 146.24,167.65 L 145.19,165.43 L 148.11,164.75 L 152.34,166.74 Z' },
+  { id: 'malappuram', name: 'Malappuram', note: 'Chaliyar & Kadalundi basin', severity: 'Moderate', cx: 206.0, cy: 266.6,
+    d: 'M 204.41,218.22 L 210.85,214.87 L 211.56,211.52 L 211.62,211.07 L 212.00,210.95 L 216.56,209.42 L 218.05,206.53 L 218.05,206.53 L 218.05,206.53 L 220.63,210.38 L 220.03,215.61 L 225.58,213.34 L 227.12,215.95 L 231.79,217.71 L 234.21,215.66 L 242.52,220.37 L 245.60,219.58 L 245.16,222.36 L 251.86,227.58 L 260.39,230.25 L 258.96,232.86 L 264.90,232.18 L 265.23,236.38 L 263.30,238.99 L 264.57,241.03 L 261.76,242.85 L 260.99,245.58 L 250.76,250.29 L 250.16,255.45 L 249.17,256.08 L 243.51,254.83 L 243.18,258.18 L 244.88,260.73 L 244.11,268.68 L 240.70,269.75 L 241.09,271.68 L 234.49,273.27 L 232.29,275.43 L 232.56,278.38 L 227.07,279.01 L 225.53,281.28 L 225.53,281.33 L 226.19,283.43 L 229.65,282.18 L 232.07,282.98 L 231.52,285.93 L 233.00,286.90 L 238.50,287.24 L 236.96,290.70 L 232.12,289.85 L 230.97,296.49 L 232.84,298.53 L 232.73,301.20 L 227.23,298.87 L 223.16,299.61 L 220.80,304.04 L 217.88,304.09 L 215.30,299.72 L 213.81,302.22 L 211.95,302.39 L 211.18,300.40 L 209.09,301.08 L 208.43,299.67 L 205.62,303.41 L 202.60,302.50 L 202.65,305.23 L 200.34,304.66 L 199.79,307.04 L 198.58,306.19 L 197.54,310.62 L 195.06,311.07 L 193.14,311.24 L 189.68,309.77 L 189.62,309.88 L 187.15,313.80 L 190.56,317.03 L 188.91,322.03 L 189.18,322.94 L 189.84,325.21 L 190.06,325.77 L 190.23,325.77 L 190.39,326.00 L 192.98,326.46 L 193.31,327.25 L 193.42,327.65 L 193.36,327.65 L 193.20,327.87 L 193.09,328.67 L 192.81,328.50 L 190.78,331.56 L 186.76,332.42 L 184.89,333.66 L 180.55,334.23 L 180.16,333.72 L 176.70,334.46 L 169.66,318.06 L 157.13,268.05 L 159.98,265.10 L 162.02,265.33 L 161.03,263.51 L 162.90,260.73 L 166.36,260.62 L 165.87,258.69 L 162.46,258.12 L 161.63,255.62 L 167.74,251.88 L 168.23,250.00 L 170.87,250.91 L 179.28,245.97 L 182.14,247.85 L 185.11,246.14 L 189.84,246.60 L 195.56,240.07 L 200.12,238.93 L 200.62,235.59 L 196.88,233.26 L 196.82,233.26 L 198.03,227.92 L 198.80,224.52 L 200.67,224.74 L 202.71,221.91 L 204.36,223.04 L 204.41,218.22 L 204.41,218.22 Z' },
+  { id: 'palakkad', name: 'Palakkad', note: 'Gap region, drier', severity: 'Low', cx: 266.2, cy: 317.8,
+    d: 'M 193.42,327.65 L 193.31,327.25 L 192.98,326.46 L 190.39,326.00 L 190.23,325.77 L 190.06,325.77 L 189.84,325.21 L 189.18,322.94 L 188.91,322.03 L 190.56,317.03 L 187.15,313.80 L 189.62,309.88 L 189.68,309.77 L 193.14,311.24 L 195.06,311.07 L 197.54,310.62 L 198.58,306.19 L 199.79,307.04 L 200.34,304.66 L 202.65,305.23 L 202.60,302.50 L 205.62,303.41 L 208.43,299.67 L 209.09,301.08 L 211.18,300.40 L 211.95,302.39 L 213.81,302.22 L 215.30,299.72 L 217.88,304.09 L 220.80,304.04 L 223.16,299.61 L 227.23,298.87 L 232.73,301.20 L 232.84,298.53 L 230.97,296.49 L 232.12,289.85 L 236.96,290.70 L 238.50,287.24 L 233.00,286.90 L 231.52,285.93 L 232.07,282.98 L 229.65,282.18 L 226.19,283.43 L 225.53,281.33 L 225.53,281.28 L 227.07,279.01 L 232.56,278.38 L 232.29,275.43 L 234.49,273.27 L 241.09,271.68 L 240.70,269.75 L 244.11,268.68 L 244.88,260.73 L 243.18,258.18 L 243.51,254.83 L 249.17,256.08 L 250.54,256.36 L 251.53,258.18 L 253.79,257.04 L 253.62,254.94 L 257.20,254.60 L 257.64,254.54 L 262.81,258.46 L 276.99,257.15 L 286.28,250.97 L 287.22,250.34 L 287.82,250.63 L 288.65,250.46 L 288.65,250.29 L 292.94,253.92 L 291.89,257.61 L 286.89,261.35 L 288.48,265.16 L 289.42,263.74 L 292.33,266.69 L 294.81,266.12 L 294.09,271.12 L 295.80,274.69 L 294.15,275.54 L 294.59,278.04 L 299.32,280.25 L 302.67,278.49 L 301.35,280.99 L 297.56,282.24 L 290.19,280.54 L 289.97,280.54 L 287.60,282.64 L 282.27,293.37 L 281.01,295.92 L 281.67,296.54 L 283.04,297.96 L 284.14,299.10 L 293.71,303.24 L 299.81,303.18 L 306.79,306.02 L 310.59,311.02 L 310.04,314.14 L 310.04,314.31 L 317.63,315.84 L 317.79,316.52 L 318.51,319.76 L 315.92,326.91 L 315.76,327.31 L 315.76,327.31 L 315.70,327.42 L 316.31,329.35 L 315.92,329.80 L 312.84,333.95 L 312.40,334.57 L 313.17,335.14 L 314.82,341.50 L 304.70,342.12 L 304.10,343.82 L 305.14,347.00 L 308.33,348.02 L 307.84,355.86 L 308.99,357.05 L 304.98,374.30 L 307.51,376.69 L 306.02,378.62 L 309.82,382.76 L 307.62,387.07 L 307.40,387.53 L 304.87,385.66 L 303.11,387.53 L 295.63,387.58 L 297.12,383.73 L 289.75,381.91 L 285.68,383.44 L 281.83,380.04 L 280.79,381.34 L 276.17,381.00 L 270.94,372.49 L 266.44,372.60 L 261.21,367.38 L 253.84,364.71 L 248.95,359.04 L 247.52,357.05 L 248.62,354.10 L 243.01,348.14 L 244.72,348.25 L 247.08,345.30 L 245.43,343.43 L 246.37,339.96 L 250.38,337.69 L 248.84,332.93 L 251.20,332.42 L 254.39,327.70 L 253.13,324.47 L 242.24,325.32 L 239.99,321.97 L 237.51,322.77 L 235.86,325.83 L 226.13,323.79 L 220.63,325.26 L 219.48,321.35 L 211.51,319.87 L 213.76,321.92 L 213.43,324.47 L 211.73,324.64 L 208.76,330.20 L 207.77,331.00 L 207.55,331.17 L 207.38,331.34 L 206.56,329.58 L 206.56,329.52 L 206.06,330.49 L 202.93,328.84 L 201.39,330.66 L 197.48,327.93 L 193.47,327.76 L 193.42,327.65 Z' },
+  { id: 'thrissur', name: 'Thrissur', note: 'Paddy lowlands, Chalakudy river', severity: 'Severe', cx: 230.1, cy: 367.0,
+    d: 'M 176.70,334.46 L 180.16,333.72 L 180.55,334.23 L 184.89,333.66 L 186.76,332.42 L 190.78,331.56 L 192.81,328.50 L 193.09,328.67 L 193.20,327.87 L 193.36,327.65 L 193.42,327.65 L 193.47,327.76 L 197.48,327.93 L 201.39,330.66 L 202.93,328.84 L 206.06,330.49 L 206.56,329.52 L 206.56,329.58 L 207.38,331.34 L 207.55,331.17 L 207.77,331.00 L 208.76,330.20 L 211.73,324.64 L 213.43,324.47 L 213.76,321.92 L 211.51,319.87 L 219.48,321.35 L 220.63,325.26 L 226.13,323.79 L 235.86,325.83 L 237.51,322.77 L 239.99,321.97 L 242.24,325.32 L 253.13,324.47 L 254.39,327.70 L 251.20,332.42 L 248.84,332.93 L 250.38,337.69 L 246.37,339.96 L 245.43,343.43 L 247.08,345.30 L 244.72,348.25 L 243.01,348.14 L 248.62,354.10 L 247.52,357.05 L 248.95,359.04 L 253.84,364.71 L 261.21,367.38 L 266.44,372.60 L 270.94,372.49 L 276.17,381.00 L 280.79,381.34 L 281.83,380.04 L 285.68,383.44 L 289.75,381.91 L 297.12,383.73 L 295.63,387.58 L 303.11,387.53 L 304.87,385.66 L 307.40,387.53 L 307.62,387.07 L 308.11,387.36 L 307.84,388.83 L 306.79,391.90 L 307.07,392.24 L 309.82,395.36 L 313.50,393.37 L 313.50,396.72 L 316.25,399.16 L 313.94,398.09 L 311.52,397.01 L 308.55,395.64 L 307.84,396.16 L 303.93,395.25 L 303.33,395.47 L 303.06,395.36 L 297.83,397.86 L 294.64,396.38 L 286.94,398.48 L 281.89,396.04 L 275.84,397.06 L 269.24,392.64 L 269.24,392.69 L 267.64,394.00 L 268.74,395.36 L 265.89,395.64 L 245.10,394.00 L 241.53,399.90 L 233.72,403.59 L 232.45,406.88 L 229.49,407.45 L 229.65,410.97 L 228.06,410.52 L 227.62,411.37 L 223.99,412.05 L 222.01,408.13 L 221.90,407.96 L 215.90,407.22 L 215.02,409.21 L 207.44,410.69 L 198.09,380.60 L 176.70,334.46 Z M 317.30,400.07 L 317.57,400.36 L 317.46,400.30 L 317.30,400.07 Z' },
+  { id: 'idukki', name: 'Idukki', note: 'Dam catchment, landslide risk', severity: 'Severe', cx: 340.9, cy: 462.9,
+    d: 'M 339.73,398.94 L 340.00,398.09 L 340.33,397.23 L 338.96,395.42 L 346.49,391.33 L 346.71,391.67 L 352.32,388.15 L 359.41,384.24 L 367.55,384.97 L 366.40,390.48 L 371.79,398.48 L 371.13,403.59 L 374.92,403.31 L 375.47,403.31 L 376.51,405.41 L 373.44,410.46 L 372.39,419.82 L 372.34,419.99 L 368.32,418.80 L 363.37,420.56 L 363.32,420.62 L 362.88,425.16 L 371.84,434.13 L 370.47,436.68 L 372.01,437.93 L 373.16,444.00 L 369.26,445.88 L 365.02,453.03 L 365.41,456.04 L 364.14,457.17 L 367.88,461.03 L 365.74,462.05 L 365.57,465.46 L 368.43,466.48 L 369.26,469.20 L 365.68,470.74 L 367.17,473.63 L 365.30,477.32 L 365.85,479.53 L 362.82,480.78 L 363.32,484.93 L 359.41,490.55 L 358.92,491.96 L 357.44,497.41 L 357.71,497.53 L 363.59,497.30 L 367.39,502.12 L 372.72,503.43 L 379.87,498.95 L 381.68,499.46 L 381.02,502.35 L 383.11,503.37 L 386.36,499.00 L 387.07,499.91 L 385.81,500.14 L 386.14,502.75 L 384.71,504.34 L 386.96,506.49 L 386.96,507.46 L 389.93,511.60 L 392.24,510.35 L 392.57,510.86 L 394.00,513.13 L 392.02,515.06 L 391.03,520.68 L 388.72,521.71 L 387.62,520.91 L 386.74,520.97 L 385.92,521.93 L 383.44,526.08 L 383.17,526.70 L 383.17,526.64 L 383.17,526.70 L 383.17,526.70 L 383.11,528.46 L 382.95,533.74 L 382.67,535.04 L 380.97,539.24 L 377.23,539.30 L 377.12,543.22 L 374.54,545.09 L 374.65,548.95 L 369.59,546.45 L 367.83,547.53 L 365.96,545.49 L 369.15,532.49 L 367.72,529.82 L 365.52,525.79 L 363.65,522.39 L 363.59,522.33 L 359.85,521.48 L 359.47,518.75 L 357.60,520.34 L 355.51,518.92 L 352.60,520.80 L 347.65,519.38 L 345.23,520.51 L 341.49,522.56 L 342.26,527.10 L 333.96,528.40 L 333.85,528.40 L 333.90,528.35 L 335.00,523.41 L 327.74,520.00 L 328.46,519.72 L 329.78,519.21 L 329.06,514.89 L 326.64,513.19 L 324.94,516.14 L 318.01,511.38 L 317.57,508.82 L 315.32,508.54 L 314.77,502.35 L 316.75,501.50 L 316.31,494.80 L 317.85,494.23 L 321.86,497.19 L 322.68,496.16 L 320.16,492.76 L 321.48,491.23 L 317.79,487.65 L 315.65,481.58 L 312.51,478.85 L 311.58,479.70 L 303.71,470.68 L 299.37,467.84 L 295.69,466.42 L 293.93,468.41 L 285.46,463.36 L 284.64,463.02 L 279.58,462.90 L 276.83,461.26 L 276.99,460.75 L 277.10,460.35 L 277.49,459.33 L 277.43,453.99 L 277.05,451.84 L 277.38,451.67 L 277.87,451.50 L 279.91,450.64 L 284.80,452.01 L 287.27,452.18 L 287.38,452.06 L 285.35,450.19 L 291.23,445.19 L 289.47,442.70 L 290.08,440.82 L 294.42,439.92 L 297.45,441.51 L 297.23,437.08 L 300.03,433.22 L 306.24,436.62 L 308.44,434.86 L 301.96,432.20 L 298.00,428.51 L 305.91,429.08 L 304.76,426.12 L 306.57,425.10 L 312.18,427.49 L 312.51,424.19 L 321.48,411.48 L 330.71,414.20 L 335.99,411.31 L 336.10,411.31 L 343.47,411.71 L 345.72,410.52 L 342.04,406.32 L 337.42,406.94 L 334.73,404.78 L 341.05,402.12 L 339.95,398.82 L 339.73,398.94 Z' },
+  { id: 'ernakulam', name: 'Ernakulam', note: 'Periyar basin & Kochi backwaters', severity: 'Critical', cx: 264.5, cy: 426.0,
+    d: 'M 215.02,409.21 L 215.90,407.22 L 221.90,407.96 L 222.01,408.13 L 223.99,412.05 L 227.62,411.37 L 228.06,410.52 L 229.65,410.97 L 229.49,407.45 L 232.45,406.88 L 233.72,403.59 L 241.53,399.90 L 245.10,394.00 L 265.89,395.64 L 268.74,395.36 L 267.64,394.00 L 269.24,392.69 L 269.24,392.64 L 275.84,397.06 L 281.89,396.04 L 286.94,398.48 L 294.64,396.38 L 297.83,397.86 L 303.06,395.36 L 303.33,395.47 L 303.93,395.25 L 307.84,396.16 L 308.55,395.64 L 311.52,397.01 L 313.94,398.09 L 316.25,399.16 L 316.86,399.39 L 317.30,400.07 L 317.46,400.30 L 319.00,402.46 L 319.28,402.97 L 319.33,402.97 L 323.40,402.40 L 329.72,405.24 L 339.68,399.16 L 339.73,398.94 L 339.95,398.82 L 341.05,402.12 L 334.73,404.78 L 337.42,406.94 L 342.04,406.32 L 345.72,410.52 L 343.47,411.71 L 336.10,411.31 L 335.99,411.31 L 330.71,414.20 L 321.48,411.48 L 312.51,424.19 L 312.18,427.49 L 306.57,425.10 L 304.76,426.12 L 305.91,429.08 L 298.00,428.51 L 301.96,432.20 L 308.44,434.86 L 306.24,436.62 L 300.03,433.22 L 297.23,437.08 L 297.45,441.51 L 294.42,439.92 L 290.08,440.82 L 289.47,442.70 L 291.23,445.19 L 285.35,450.19 L 287.38,452.06 L 287.27,452.18 L 284.80,452.01 L 279.91,450.64 L 277.87,451.50 L 277.38,451.67 L 277.05,451.84 L 277.43,453.99 L 277.49,459.33 L 277.10,460.35 L 276.99,460.75 L 276.61,460.46 L 275.95,460.58 L 274.46,461.09 L 275.18,463.36 L 269.68,462.45 L 269.73,465.68 L 266.88,465.91 L 266.05,468.81 L 264.90,468.92 L 264.68,468.92 L 264.62,468.92 L 263.63,465.80 L 260.77,465.46 L 258.68,461.37 L 253.84,462.62 L 251.42,461.71 L 244.94,465.57 L 241.09,462.22 L 238.94,463.24 L 238.78,463.36 L 235.86,456.21 L 232.73,457.11 L 227.51,455.41 L 227.51,460.92 L 225.80,461.43 L 225.03,464.55 L 226.46,467.44 L 224.81,470.57 L 225.47,476.36 L 218.60,445.14 L 219.04,441.28 L 216.07,438.72 L 208.15,410.97 L 215.02,409.21 Z' },
+  { id: 'alappuzha', name: 'Alappuzha', note: 'Kuttanad, below sea level', severity: 'Critical', cx: 250.1, cy: 525.7,
+    d: 'M 224.81,470.57 L 226.46,467.44 L 225.03,464.55 L 225.80,461.43 L 227.51,460.92 L 227.51,455.41 L 232.73,457.11 L 235.86,456.21 L 238.78,463.36 L 239.99,465.91 L 237.62,470.00 L 239.99,476.36 L 239.22,484.53 L 243.23,486.29 L 241.64,507.29 L 244.94,504.90 L 246.75,506.95 L 252.69,505.13 L 252.58,508.08 L 254.67,508.82 L 254.83,513.36 L 259.12,515.01 L 257.03,523.07 L 257.03,523.07 L 259.45,524.20 L 258.74,529.03 L 258.68,529.20 L 258.74,529.20 L 259.89,529.59 L 259.12,533.23 L 259.12,533.23 L 259.12,533.23 L 259.12,533.28 L 261.16,534.93 L 261.10,534.99 L 260.22,536.86 L 255.22,538.11 L 253.79,540.10 L 254.01,540.15 L 255.16,540.61 L 257.75,541.51 L 265.23,541.29 L 266.66,538.39 L 265.23,537.20 L 267.70,536.46 L 278.86,538.79 L 277.93,540.89 L 280.68,546.17 L 283.87,546.23 L 284.80,548.10 L 281.06,550.37 L 281.45,553.49 L 278.64,555.08 L 279.74,559.05 L 286.12,563.71 L 283.81,564.90 L 283.76,567.17 L 278.53,567.91 L 278.26,567.91 L 278.15,568.59 L 277.76,569.27 L 277.76,569.04 L 271.49,570.52 L 270.39,572.73 L 266.55,573.81 L 264.07,569.84 L 259.34,569.72 L 258.08,570.01 L 258.68,571.54 L 254.50,571.77 L 254.50,571.88 L 254.39,571.88 L 255.77,577.27 L 235.09,531.64 L 230.92,517.16 L 224.81,470.57 Z' },
+  { id: 'kottayam', name: 'Kottayam', note: 'Vembanad backwater fringe', severity: 'Severe', cx: 280.3, cy: 493.7,
+    d: 'M 276.99,460.75 L 276.83,461.26 L 279.58,462.90 L 284.64,463.02 L 285.46,463.36 L 293.93,468.41 L 295.69,466.42 L 299.37,467.84 L 303.71,470.68 L 311.58,479.70 L 312.51,478.85 L 315.65,481.58 L 317.79,487.65 L 321.48,491.23 L 320.16,492.76 L 322.68,496.16 L 321.86,497.19 L 317.85,494.23 L 316.31,494.80 L 316.75,501.50 L 314.77,502.35 L 315.32,508.54 L 317.57,508.82 L 318.01,511.38 L 324.94,516.14 L 326.64,513.19 L 329.06,514.89 L 329.78,519.21 L 328.46,519.72 L 326.86,519.95 L 324.11,522.44 L 323.45,522.90 L 323.45,523.01 L 323.84,525.22 L 325.38,524.37 L 330.05,526.13 L 321.15,527.44 L 321.09,527.38 L 310.59,521.08 L 309.82,522.90 L 307.40,521.88 L 306.02,522.84 L 302.56,520.85 L 297.34,524.20 L 294.86,521.88 L 294.48,518.53 L 288.87,521.59 L 287.66,518.13 L 284.03,516.94 L 279.03,517.79 L 277.93,520.29 L 276.72,518.92 L 276.55,520.40 L 271.44,522.39 L 271.66,527.84 L 269.51,526.42 L 266.60,528.06 L 265.72,526.02 L 260.11,528.63 L 259.89,529.59 L 258.74,529.20 L 258.68,529.20 L 258.74,529.03 L 259.45,524.20 L 257.03,523.07 L 257.03,523.07 L 259.12,515.01 L 254.83,513.36 L 254.67,508.82 L 252.58,508.08 L 252.69,505.13 L 246.75,506.95 L 244.94,504.90 L 241.64,507.29 L 243.23,486.29 L 239.22,484.53 L 239.99,476.36 L 237.62,470.00 L 239.99,465.91 L 238.78,463.36 L 238.94,463.24 L 241.09,462.22 L 244.94,465.57 L 251.42,461.71 L 253.84,462.62 L 258.68,461.37 L 260.77,465.46 L 263.63,465.80 L 264.62,468.92 L 264.68,468.92 L 264.90,468.92 L 266.05,468.81 L 266.88,465.91 L 269.73,465.68 L 269.68,462.45 L 275.18,463.36 L 274.46,461.09 L 275.95,460.58 L 276.61,460.46 L 276.99,460.75 Z' },
+  { id: 'pathanamthitta', name: 'Pathanamthitta', note: 'Pamba river basin', severity: 'Severe', cx: 321.5, cy: 547.3,
+    d: 'M 328.46,519.72 L 327.74,520.00 L 335.00,523.41 L 333.90,528.35 L 333.85,528.40 L 333.96,528.40 L 342.26,527.10 L 341.49,522.56 L 345.23,520.51 L 347.65,519.38 L 352.60,520.80 L 355.51,518.92 L 357.60,520.34 L 359.47,518.75 L 359.85,521.48 L 363.59,522.33 L 363.65,522.39 L 365.52,525.79 L 367.72,529.82 L 369.15,532.49 L 365.96,545.49 L 367.83,547.53 L 369.59,546.45 L 374.65,548.95 L 374.54,545.09 L 375.53,548.84 L 373.55,554.80 L 374.59,557.52 L 370.14,561.66 L 371.90,562.17 L 372.45,567.17 L 369.31,571.65 L 364.09,575.29 L 362.93,579.49 L 362.88,579.66 L 348.42,576.19 L 340.99,572.73 L 340.50,571.20 L 335.22,570.74 L 322.02,564.05 L 321.42,569.33 L 326.48,570.69 L 324.66,572.67 L 317.19,570.63 L 315.21,571.88 L 313.83,570.52 L 308.83,576.48 L 300.09,573.13 L 297.39,576.08 L 298.22,579.09 L 298.22,579.15 L 297.78,579.20 L 296.46,579.43 L 296.35,579.43 L 295.69,577.05 L 294.53,578.35 L 286.28,576.76 L 283.76,578.69 L 283.59,573.02 L 282.33,572.79 L 280.51,573.19 L 278.04,571.99 L 277.71,571.82 L 277.65,571.82 L 277.71,571.31 L 277.76,569.27 L 278.15,568.59 L 278.26,567.91 L 278.53,567.91 L 283.76,567.17 L 283.81,564.90 L 286.12,563.71 L 279.74,559.05 L 278.64,555.08 L 281.45,553.49 L 281.06,550.37 L 284.80,548.10 L 283.87,546.23 L 280.68,546.17 L 277.93,540.89 L 278.86,538.79 L 267.70,536.46 L 265.23,537.20 L 266.66,538.39 L 265.23,541.29 L 257.75,541.51 L 255.16,540.61 L 254.01,540.15 L 253.79,540.10 L 255.22,538.11 L 260.22,536.86 L 261.10,534.99 L 261.16,534.93 L 259.12,533.28 L 259.12,533.23 L 259.12,533.23 L 259.12,533.23 L 259.89,529.59 L 260.11,528.63 L 265.72,526.02 L 266.60,528.06 L 269.51,526.42 L 271.66,527.84 L 271.44,522.39 L 276.55,520.40 L 276.72,518.92 L 277.93,520.29 L 279.03,517.79 L 284.03,516.94 L 287.66,518.13 L 288.87,521.59 L 294.48,518.53 L 294.86,521.88 L 297.34,524.20 L 302.56,520.85 L 306.02,522.84 L 307.40,521.88 L 309.82,522.90 L 310.59,521.08 L 321.09,527.38 L 321.15,527.44 L 330.05,526.13 L 325.38,524.37 L 323.84,525.22 L 323.45,523.01 L 323.45,522.90 L 324.11,522.44 L 326.86,519.95 L 328.46,519.72 Z' },
+  { id: 'kollam', name: 'Kollam', note: 'Ashtamudi estuary', severity: 'Moderate', cx: 313.3, cy: 596.3,
+    d: 'M 254.50,571.88 L 254.50,571.77 L 258.68,571.54 L 258.08,570.01 L 259.34,569.72 L 264.07,569.84 L 266.55,573.81 L 270.39,572.73 L 271.49,570.52 L 277.76,569.04 L 277.76,569.27 L 277.71,571.31 L 277.65,571.82 L 277.71,571.82 L 278.04,571.99 L 280.51,573.19 L 282.33,572.79 L 283.59,573.02 L 283.76,578.69 L 286.28,576.76 L 294.53,578.35 L 295.69,577.05 L 296.35,579.43 L 296.46,579.43 L 297.78,579.20 L 298.22,579.15 L 298.22,579.09 L 297.39,576.08 L 300.09,573.13 L 308.83,576.48 L 313.83,570.52 L 315.21,571.88 L 317.19,570.63 L 324.66,572.67 L 326.48,570.69 L 321.42,569.33 L 322.02,564.05 L 335.22,570.74 L 340.50,571.20 L 340.99,572.73 L 348.42,576.19 L 362.88,579.66 L 361.89,583.40 L 357.38,583.63 L 354.36,587.20 L 361.72,597.36 L 361.23,601.68 L 365.46,601.51 L 365.46,605.03 L 370.85,609.34 L 371.84,614.45 L 367.06,619.78 L 366.67,623.30 L 364.25,624.10 L 364.86,625.69 L 364.31,625.63 L 362.22,625.29 L 360.95,625.06 L 348.42,616.32 L 339.95,613.88 L 337.20,614.45 L 335.50,618.37 L 333.63,619.05 L 336.10,624.67 L 332.91,625.18 L 329.61,622.45 L 328.35,624.67 L 322.63,626.88 L 319.66,624.67 L 320.60,623.25 L 317.46,619.50 L 315.10,620.30 L 310.70,618.82 L 304.98,611.89 L 302.73,613.54 L 299.98,611.44 L 298.88,614.28 L 301.68,616.66 L 299.98,617.97 L 301.41,618.88 L 298.22,619.22 L 296.62,622.22 L 290.85,620.41 L 288.98,622.28 L 286.45,622.22 L 285.02,624.32 L 284.91,624.50 L 284.86,624.55 L 274.24,611.78 L 269.95,608.66 L 267.59,608.72 L 264.90,605.25 L 263.08,600.49 L 264.35,600.15 L 263.08,600.15 L 254.50,571.88 Z' },
+  { id: 'thiruvananthapuram', name: 'Thiruvananthapuram', note: 'Capital coastal belt', severity: 'Low', cx: 334.4, cy: 649.9,
+    d: 'M 284.91,624.50 L 285.02,624.32 L 286.45,622.22 L 288.98,622.28 L 290.85,620.41 L 296.62,622.22 L 298.22,619.22 L 301.41,618.88 L 299.98,617.97 L 301.68,616.66 L 298.88,614.28 L 299.98,611.44 L 302.73,613.54 L 304.98,611.89 L 310.70,618.82 L 315.10,620.30 L 317.46,619.50 L 320.60,623.25 L 319.66,624.67 L 322.63,626.88 L 328.35,624.67 L 329.61,622.45 L 332.91,625.18 L 336.10,624.67 L 333.63,619.05 L 335.50,618.37 L 337.20,614.45 L 339.95,613.88 L 348.42,616.32 L 360.95,625.06 L 362.22,625.29 L 362.11,625.52 L 362.00,625.52 L 361.01,629.66 L 358.20,628.53 L 357.82,629.66 L 363.32,638.40 L 362.44,640.73 L 367.44,647.14 L 369.53,647.99 L 369.20,650.66 L 372.39,654.35 L 372.67,654.46 L 372.72,654.52 L 374.81,659.29 L 371.51,665.42 L 371.51,665.47 L 368.10,667.01 L 364.31,664.57 L 362.49,666.27 L 366.34,674.50 L 363.21,674.95 L 357.49,684.09 L 354.91,683.98 L 356.45,685.62 L 355.18,688.46 L 358.37,687.89 L 357.27,690.34 L 359.25,693.29 L 359.25,693.34 L 358.26,693.97 L 357.60,691.87 L 351.66,693.06 L 347.04,697.94 L 330.38,685.28 L 326.42,678.30 L 287.55,630.17 L 284.91,624.50 Z' },
+  { id: 'kannur', name: 'Kannur', note: 'Coastal plain', severity: 'Low', cx: 112.0, cy: 134.8,
+    d: 'M 58.48,121.16 L 60.13,119.29 L 61.73,120.25 L 61.84,120.14 L 62.33,117.53 L 61.84,115.20 L 63.10,113.50 L 59.69,106.01 L 64.09,105.84 L 68.49,101.18 L 71.40,101.58 L 76.96,99.36 L 76.68,95.22 L 78.39,93.86 L 85.32,94.26 L 92.30,90.68 L 95.65,90.74 L 95.60,90.79 L 106.15,90.74 L 114.35,102.03 L 113.30,104.30 L 116.27,105.67 L 119.96,110.94 L 122.21,112.48 L 126.28,111.11 L 128.75,112.25 L 130.68,118.27 L 132.55,119.80 L 138.76,118.32 L 138.60,120.76 L 140.96,121.78 L 140.52,124.05 L 146.29,121.78 L 153.66,122.69 L 152.34,126.33 L 152.34,126.38 L 152.40,126.50 L 153.39,129.16 L 156.63,132.80 L 157.62,137.11 L 160.26,137.51 L 163.67,142.05 L 173.62,143.75 L 174.06,143.81 L 173.24,144.49 L 172.14,146.36 L 172.52,147.72 L 173.57,151.47 L 169.83,153.91 L 172.80,156.41 L 172.19,158.73 L 154.54,156.69 L 151.74,158.96 L 152.84,162.42 L 152.89,162.42 L 152.67,162.48 L 149.10,164.86 L 152.34,166.74 L 148.11,164.75 L 145.19,165.43 L 146.24,167.65 L 142.61,168.27 L 140.74,165.72 L 137.00,165.38 L 133.21,171.56 L 121.55,178.54 L 123.42,182.46 L 118.80,184.22 L 116.38,179.96 L 113.96,179.51 L 113.30,179.34 L 112.09,179.11 L 104.89,170.20 L 101.54,169.46 L 102.69,168.21 L 100.60,167.76 L 99.17,164.30 L 91.42,156.58 L 86.96,156.01 L 81.47,149.20 L 79.10,142.16 L 77.34,141.71 L 71.35,133.48 L 67.78,131.21 L 63.82,133.82 L 58.48,121.16 Z' },
+];
+const districtById = Object.fromEntries(KERALA_DISTRICTS.map(d => [d.id, d]));
+const KM_PER_UNIT = 111.0 / KERALA_PROJ.scale;
+
+function project(lat, lng) {
+  const x = (lng - KERALA_PROJ.minLng) * KERALA_PROJ.cosMean * KERALA_PROJ.scale + KERALA_PROJ.pad;
+  const y = (KERALA_PROJ.maxLat - lat) * KERALA_PROJ.scale + KERALA_PROJ.pad;
+  return [x, y];
+}
+function unproject(x, y) {
+  const lng = (x - KERALA_PROJ.pad) / (KERALA_PROJ.cosMean * KERALA_PROJ.scale) + KERALA_PROJ.minLng;
+  const lat = KERALA_PROJ.maxLat - (y - KERALA_PROJ.pad) / KERALA_PROJ.scale;
+  return [lat, lng];
+}
+function nearestDistrict(lat, lng) {
+  const [x, y] = project(lat, lng);
+  let best = null, bestD = Infinity;
+  for (const d of KERALA_DISTRICTS) {
+    const dd = Math.hypot(d.cx - x, d.cy - y);
+    if (dd < bestD) { bestD = dd; best = d; }
+  }
+  return best;
+}
+function districtCenterLatLng(id) {
+  const d = districtById[id];
+  return unproject(d.cx, d.cy);
+}
+
+/* ============================================================
+   DATA MODEL &mdash; priorities, categories, urgency classifier, seed
+   ============================================================ */
+const PRIORITIES = ["Emergency", "High", "Medium", "Low"];
+const PRI_RANK = { Emergency: 0, High: 1, Medium: 2, Low: 3 };
+const PRI_COLOR = { Emergency: "var(--critical)", High: "var(--high)", Medium: "var(--medium)", Low: "var(--low)" };
+const PRI_BG = { Emergency: "var(--critical-bg)", High: "var(--high-bg)", Medium: "var(--medium-bg)", Low: "var(--low-bg)" };
+
+const SEVERITY_COLOR = { Critical: "#AD3226", Severe: "#D3652C", Moderate: "#DA9F35", Low: "#5E8A66" };
+const SEVERITY_LIST = ["Critical", "Severe", "Moderate", "Low"];
+
+const STATUS_FLOW = ["Assigned", "En Route", "On Site", "Resolved"];
+
+const CATEGORIES = [
+  { id: "rescue", label: "Rescue", Icon: IconAlert },
+  { id: "medical", label: "Medical", Icon: IconCross },
+  { id: "food", label: "Food / water", Icon: IconDroplet },
+  { id: "shelter", label: "Shelter", Icon: IconHome },
+  { id: "general", label: "Other", Icon: IconInbox },
+];
+
+const CRITICAL_KEYWORDS = ["trapped", "drowning", "not breathing", "unconscious", "bleeding heavily", "collapsed", "buried", "capsized", "chest pain", "labour", "labor", "rising rapidly", "cannot swim", "can't swim", "swept away", "stuck on roof", "stuck on the roof"];
+const HIGH_KEYWORDS = ["insulin", "dialysis", "wheelchair", "cannot evacuate", "can't evacuate", "diabetic", "pregnant", "cut off", "oxygen", "ventilator", "infant", "newborn", "bedridden"];
+
+function classifyUrgency(text, flags) {
+  const t = (text || "").toLowerCase();
+  let score = 32;
+  if (CRITICAL_KEYWORDS.some(k => t.includes(k))) score = 90;
+  else if (HIGH_KEYWORDS.some(k => t.includes(k))) score = 66;
+  if (flags.elderly) score += 9;
+  if (flags.children) score += 9;
+  if (flags.medical) score += 14;
+  score = Math.min(100, Math.round(score));
+  const priority = score >= 80 ? "Emergency" : score >= 55 ? "High" : score >= 30 ? "Medium" : "Low";
+  return { score, priority };
+}
+
+// Used only when the backend is unreachable, so the volunteer view still has
+// someone to demo as. When the backend is live, the real roster (and real
+// login) comes from GET /api/volunteers / POST /api/auth/login instead.
+const OFFLINE_VOLUNTEERS = [
+  { id: -1, name: "Arjun Menon", lat: 10.1075, lng: 76.3516 },
+  { id: -2, name: "Divya Pillai", lat: 9.9816, lng: 76.2999 },
+  { id: -3, name: "Rahul Varma", lat: 9.3833, lng: 76.4333 },
+];
+
+let _idCounter = 100;
+function nextId() { return "R-" + (_idCounter++); }
+
+/* ============================================================
+   BACKEND API LAYER
+   The FastAPI service in backend/ is the source of truth for
+   requests: it runs the real ML triage (TF-IDF + LogReg text
+   severity, vulnerability rules, DBSCAN hotspot boost) and stores
+   everything in SQLite. Run `uvicorn main:app` from backend/ --
+   it serves this exact file at http://localhost:8000/, so the
+   relative fetches below work with zero config. To point at a
+   backend hosted elsewhere, open this file with ?api=http://host:port
+   in the URL.
+   ============================================================ */
+const API_BASE = (new URLSearchParams(location.search).get("api") || "").replace(/\/$/, "");
+const api = (path) => API_BASE + path;
+
+const UI_STATUS_TO_API = { "Pending": "pending", "Assigned": "assigned", "En Route": "en_route", "On Site": "on_site", "Resolved": "resolved" };
+const API_STATUS_TO_UI = { pending: "Pending", assigned: "Assigned", en_route: "En Route", on_site: "On Site", resolved: "Resolved", in_progress: "En Route" };
+const API_LABEL_TO_UI = { critical: "Emergency", high: "High", medium: "Medium", low: "Low" };
+
+function apiToUi(r) {
+  const hasLatLng = r.lat != null && r.lng != null;
+  const districtId = hasLatLng ? nearestDistrict(r.lat, r.lng).id : KERALA_DISTRICTS[0].id;
+  return {
+    id: r.id,
+    createdAt: r.created_at ? new Date(r.created_at + "Z").getTime() : Date.now(),
+    name: r.name,
+    phone: r.phone,
+    desc: r.description,
+    category: r.category,
+    channel: r.channel,
+    priority: API_LABEL_TO_UI[r.urgency_label] || "Medium",
+    mlScore: r.urgency_score,
+    mlConfidence: r.ml_confidence,
+    lat: r.lat, lng: r.lng, districtId,
+    status: API_STATUS_TO_UI[r.status] || "Pending",
+    assignedTo: r.assigned_to || null, // the volunteer's real name (backend has no numeric FK here), or null
+  };
+}
+
+// Note: the first four points are deliberately a tight cluster (all within
+// ~300m of each other, in Aluva) so the backend's DBSCAN hotspot detector
+// (eps=1.5km, min_samples=3) always finds a real hotspot here on a fresh
+// seed -- without a genuine 3+ point cluster, GET /api/hotspots correctly
+// returns nothing, which is why hotspots didn't show up before this fix.
+const DEMO_SEEDS = [
+  { lat: 10.1075, lng: 76.3516, name: "Radhamani K.", phone: "9847000001", desc: "Water entering house fast, elderly mother trapped on second floor, cannot swim.", channel: "app", has_elderly: true },
+  { lat: 10.1081, lng: 76.3529, name: "Suresh Nair", phone: "9847000008", desc: "Two children stuck on first floor, water still rising, near the Aluva market.", channel: "app", has_children: true },
+  { lat: 10.1069, lng: 76.3502, name: "Beena Thomas", phone: "9847000004", desc: "Diabetic patient out of insulin, area cut off by floodwater.", channel: "sms", has_medical_need: true },
+  { lat: 10.1078, lng: 76.3521, name: "Joseph Mathew", phone: "9847000003", desc: "Wheelchair user cannot evacuate alone, water rising slowly, same street as the market.", channel: "app" },
+  { lat: 9.3833, lng: 76.4333, name: "Fathima Beevi", phone: "9847000002", desc: "Pregnant woman in labour, roads flooded, cannot reach hospital.", channel: "sms" },
+  { lat: 10.5276, lng: 76.2144, name: "Unknown caller", phone: "9847000005", desc: "Need dry food and clean water for family of four.", channel: "sms" },
+  { lat: 9.3900, lng: 76.4400, name: "Anitha Raj", phone: "9847000006", desc: "House compound flooded, main house still dry for now.", channel: "app" },
+  { lat: 9.8500, lng: 77.0500, name: "Volunteer Ravi", phone: "9847000007", desc: "Want to volunteer for relief work this weekend.", channel: "app" },
+];
+
+async function postRequestToBackend(s) {
+  const res = await fetch(api("/api/requests"), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      name: s.name || null, phone: s.phone || null, channel: s.channel || "app", language: "en",
+      description: s.desc, category: s.category || "rescue",
+      has_elderly: !!s.has_elderly, has_children: !!s.has_children, has_medical_need: !!s.has_medical_need,
+      lat: s.lat, lng: s.lng, location_text: s.location_text || null,
+    }),
+  });
+  if (!res.ok) throw new Error("POST /api/requests -> " + res.status);
+  return res.json();
+}
+
+async function extractError(res, fallback) {
+  try { const j = await res.json(); return j.detail || fallback; } catch (e) { return fallback; }
+}
+
+async function patchRequestOnBackend(id, body, token) {
+  const res = await fetch(api(`/api/requests/${id}`), {
+    method: "PATCH",
+    headers: Object.assign({ "Content-Type": "application/json" }, token ? { Authorization: "Bearer " + token } : {}),
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) throw new Error(await extractError(res, "PATCH /api/requests/" + id + " -> " + res.status));
+  return res.json();
+}
+
+async function claimRequestOnBackend(id, token) {
+  const res = await fetch(api(`/api/requests/${id}/claim`), {
+    method: "POST",
+    headers: { Authorization: "Bearer " + token },
+  });
+  if (!res.ok) throw new Error(await extractError(res, "Claim failed (" + res.status + ")"));
+  return res.json();
+}
+
+async function loginRequest(username, password) {
+  const res = await fetch(api("/api/auth/login"), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username, password }),
+  });
+  if (!res.ok) throw new Error(await extractError(res, "Login failed"));
+  return res.json(); // { token, user }
+}
+
+async function logoutRequest(token) {
+  try { await fetch(api("/api/auth/logout"), { method: "POST", headers: { Authorization: "Bearer " + token } }); }
+  catch (e) { /* best effort */ }
+}
+
+async function fetchMe(token) {
+  const res = await fetch(api("/api/auth/me"), { headers: { Authorization: "Bearer " + token } });
+  if (!res.ok) throw new Error("session invalid");
+  return res.json();
+}
+
+async function fetchVolunteers(token) {
+  const res = await fetch(api("/api/volunteers"), { headers: { Authorization: "Bearer " + token } });
+  if (!res.ok) throw new Error("GET /api/volunteers -> " + res.status);
+  return res.json();
+}
+
+async function fetchHotspots() {
+  const res = await fetch(api("/api/hotspots"));
+  if (!res.ok) throw new Error("GET /api/hotspots -> " + res.status);
+  return res.json();
+}
+
+async function seedBackend() {
+  const created = [];
+  for (const s of DEMO_SEEDS) {
+    try { created.push(await postRequestToBackend(s)); }
+    catch (e) { return created; }
+  }
+  return created; // status-tagging happens live now, through login + claim/assign, not canned here
+}
+
+function seedRequestsLocal() {
+  const now = Date.now();
+  const seed = [
+    { lat: 10.1075, lng: 76.3516, priority: "Emergency", name: "Radhamani K.", phone: "9847000001", desc: "Water entering house fast, elderly mother trapped on second floor, cannot swim.", channel: "app", ageMs: 3 * 60000, assignedTo: "Arjun Menon", status: "En Route" },
+    { lat: 9.3833, lng: 76.4333, priority: "Emergency", name: "Fathima Beevi", phone: "9847000002", desc: "Pregnant woman in labour, roads flooded, cannot reach hospital.", channel: "sms", ageMs: 6 * 60000, assignedTo: "Rahul Varma", status: "Assigned" },
+    { lat: 9.9816, lng: 76.2999, priority: "High", name: "Joseph Mathew", phone: "9847000003", desc: "Wheelchair user cannot evacuate alone, water rising slowly.", channel: "app", ageMs: 14 * 60000, assignedTo: "Divya Pillai", status: "On Site" },
+    { lat: 10.1100, lng: 76.3550, priority: "High", name: "Beena Thomas", phone: "9847000004", desc: "Diabetic patient out of insulin, area cut off by floodwater.", channel: "sms", ageMs: 22 * 60000, assignedTo: null, status: "Pending" },
+    { lat: 10.5276, lng: 76.2144, priority: "Medium", name: "Unknown caller", phone: "9847000005", desc: "Need dry food and clean water for family of four.", channel: "sms", ageMs: 40 * 60000, assignedTo: null, status: "Pending" },
+    { lat: 9.3900, lng: 76.4400, priority: "Medium", name: "Anitha Raj", phone: "9847000006", desc: "House compound flooded, main house still dry for now.", channel: "app", ageMs: 55 * 60000, assignedTo: null, status: "Pending" },
+    { lat: 9.8500, lng: 77.0500, priority: "Low", name: "Volunteer Ravi", phone: "9847000007", desc: "Want to volunteer for relief work this weekend.", channel: "app", ageMs: 95 * 60000, assignedTo: null, status: "Resolved" },
+    { lat: 9.9800, lng: 76.3000, priority: "High", name: "Suresh Nair", phone: "9847000008", desc: "Two children stuck on first floor, water still rising.", channel: "app", ageMs: 2 * 60000, assignedTo: null, status: "Pending" },
+  ];
+  return seed.map(s => ({
+    id: nextId(),
+    ...s,
+    category: "rescue",
+    districtId: nearestDistrict(s.lat, s.lng).id,
+    createdAt: now - s.ageMs,
+  }));
+}
+
+/* ============================================================
+   UTILITIES
+   ============================================================ */
+function relTime(ts, tick) {
+  const diff = Math.max(0, tick - ts);
+  const s = Math.floor(diff / 1000);
+  if (s < 5) return "Just now";
+  if (s < 60) return s + "s ago";
+  const m = Math.floor(s / 60);
+  if (m < 60) return m + "m ago";
+  const h = Math.floor(m / 60);
+  if (h < 24) return h + "h ago";
+  return Math.floor(h / 24) + "d ago";
+}
+function fmtClock(tick) {
+  return new Date(tick).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+}
+function dist(a, b) {
+  return Math.hypot(a[0] - b[0], a[1] - b[1]);
+}
+function makeSmsPayload(req) {
+  const d = districtById[req.districtId];
+  return {
+    phone: "+91" + (req.phone || "9847000000"),
+    lat: req.lat.toFixed(4),
+    lng: req.lng.toFixed(4),
+    payload: `HELP ${req.priority.toUpperCase()} ${d.name.toUpperCase()}: ${req.desc}`,
+    timestamp: req.createdAt,
+  };
+}
+function loadLocal(key, fallback) {
+  try {
+    const v = window.localStorage.getItem(key);
+    return v ? JSON.parse(v) : fallback;
+  } catch (e) { return fallback; }
+}
+function saveLocal(key, value) {
+  try { window.localStorage.setItem(key, JSON.stringify(value)); } catch (e) { /* ignore */ }
+}
+
+/* ============================================================
+   APP CONTEXT
+   ============================================================ */
+const AppContext = createContext(null);
+const useApp = () => useContext(AppContext);
+
+function AppProvider({ children }) {
+  const [requests, setRequests] = useState([]);
+  const [backendOk, setBackendOk] = useState(null); // null = checking, true = live, false = unreachable (offline demo data)
+  const seededRef = useRef(false);
+  const [zones, setZones] = useState(KERALA_DISTRICTS.map(d => ({ id: d.id, severity: d.severity })));
+  const [volunteers, setVolunteers] = useState([]);
+  const [hotspots, setHotspots] = useState([]);
+  const [view, setView] = useState("citizen"); // "citizen" | "admin" | "volunteer"
+  const [network, setNetwork] = useState("online"); // "online" | "sms"
+  const [selectedDistrictId, setSelectedDistrictId] = useState(null);
+  const [tick, setTick] = useState(Date.now());
+  const [myReportIds, setMyReportIds] = useState(() => loadLocal("sahayam_my_reports", []));
+
+  // --- Auth: admin/volunteer login. Citizens never authenticate. -------
+  const [authToken, setAuthToken] = useState(() => loadLocal("sahayam_auth_token", null));
+  const [currentUser, setCurrentUser] = useState(() => loadLocal("sahayam_current_user", null));
+  const [authError, setAuthError] = useState(null);
+  const [authBusy, setAuthBusy] = useState(false);
+
+  const login = useCallback(async (username, password) => {
+    setAuthBusy(true);
+    setAuthError(null);
+    try {
+      const { token, user } = await loginRequest(username, password);
+      setAuthToken(token); setCurrentUser(user);
+      saveLocal("sahayam_auth_token", token); saveLocal("sahayam_current_user", user);
+      setBackendOk(true);
+      return true;
+    } catch (err) {
+      setAuthError(err.message || "Login failed");
+      return false;
+    } finally {
+      setAuthBusy(false);
+    }
+  }, []);
+
+  const logout = useCallback(() => {
+    if (authToken) logoutRequest(authToken);
+    setAuthToken(null); setCurrentUser(null); setVolunteers([]);
+    saveLocal("sahayam_auth_token", null); saveLocal("sahayam_current_user", null);
+  }, [authToken]);
+
+  // Continue as a local-only demo volunteer/admin when the backend can't be
+  // reached at all -- there's nothing to authenticate against, so this just
+  // lets the standalone offline demo keep working.
+  const continueOffline = useCallback((role) => {
+    const user = role === "volunteer"
+      ? { id: OFFLINE_VOLUNTEERS[0].id, username: "demo", role: "volunteer", name: OFFLINE_VOLUNTEERS[0].name, lat: OFFLINE_VOLUNTEERS[0].lat, lng: OFFLINE_VOLUNTEERS[0].lng }
+      : { id: 0, username: "demo", role: "admin", name: "Admin (offline demo)", lat: null, lng: null };
+    setCurrentUser(user);
+    setVolunteers(OFFLINE_VOLUNTEERS);
+  }, []);
+
+  // Re-validate a saved session on load, and load the volunteer roster once
+  // logged in (their names/base locations are only visible to logged-in
+  // admins/volunteers).
+  useEffect(() => {
+    if (!authToken) return;
+    let cancelled = false;
+    fetchMe(authToken).then((user) => {
+      if (cancelled) return;
+      setCurrentUser(user);
+      saveLocal("sahayam_current_user", user);
+      return fetchVolunteers(authToken);
+    }).then((vols) => { if (!cancelled && vols) setVolunteers(vols); })
+      .catch(() => {
+        if (cancelled) return;
+        // token expired/invalid (or backend restarted, wiping in-memory
+        // sessions) -- clear it so the login screen reappears.
+        setAuthToken(null); setCurrentUser(null);
+        saveLocal("sahayam_auth_token", null); saveLocal("sahayam_current_user", null);
+      });
+    return () => { cancelled = true; };
+  }, [authToken]);
+
+  useEffect(() => {
+    const t = setInterval(() => setTick(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, []);
+
+  // Pull the live request list from the FastAPI backend. On first load, if
+  // the backend has no data yet, seed it with the demo scenario so the
+  // dashboards aren't empty. If the backend can't be reached at all, fall
+  // back to local-only demo data so the prototype still demos standalone.
+  const refreshRequests = useCallback(async () => {
+    try {
+      const res = await fetch(api("/api/requests"));
+      if (!res.ok) throw new Error(String(res.status));
+      let data = await res.json();
+      if (data.length === 0 && !seededRef.current) {
+        seededRef.current = true;
+        await seedBackend();
+        const res2 = await fetch(api("/api/requests"));
+        data = res2.ok ? await res2.json() : [];
+      }
+      setBackendOk(true);
+      setRequests(data.map(apiToUi));
+    } catch (err) {
+      setBackendOk(false);
+      if (!seededRef.current) {
+        seededRef.current = true;
+        setRequests(seedRequestsLocal());
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    refreshRequests();
+    const t = setInterval(refreshRequests, 5000);
+    return () => clearInterval(t);
+  }, [refreshRequests]);
+
+  const zoneSeverity = useMemo(() => Object.fromEntries(zones.map(z => [z.id, z.severity])), [zones]);
+
+  const addRequest = useCallback(async (data) => {
+    let { lat, lng, districtId } = data;
+    if (lat == null && districtId) {
+      const [la, ln] = districtCenterLatLng(districtId);
+      lat = la; lng = ln;
+    }
+    const locationText = districtId && districtById[districtId] ? districtById[districtId].name : null;
+    try {
+      const saved = await postRequestToBackend({
+        name: data.name, phone: data.phone, channel: network === "sms" ? "sms" : "app",
+        desc: data.desc, category: data.category || "general",
+        has_elderly: !!data.has_elderly, has_children: !!data.has_children, has_medical_need: !!data.has_medical,
+        lat, lng, location_text: locationText,
+      });
+      setBackendOk(true);
+      const req = apiToUi(saved);
+      setRequests(rs => [req, ...rs.filter(r => r.id !== req.id)]);
+      return req;
+    } catch (err) {
+      console.warn("Sahayam: backend unreachable, adding request locally only.", err);
+      setBackendOk(false);
+      const req = {
+        id: nextId(), createdAt: Date.now(), channel: network === "sms" ? "sms" : "app",
+        assignedTo: null, status: "Pending", category: "general", priority: "Medium",
+        ...data, lat, lng, districtId: districtId || (lat != null ? nearestDistrict(lat, lng).id : KERALA_DISTRICTS[0].id),
+      };
+      setRequests(rs => [req, ...rs]);
+      return req;
+    }
+  }, [network]);
+
+  const updateStatus = useCallback((id, status) => {
+    setRequests(rs => rs.map(r => r.id === id ? { ...r, status } : r));
+    if (typeof id !== "number" || !authToken) return; // local-only record, or not signed in: nothing to sync
+    patchRequestOnBackend(id, { status: UI_STATUS_TO_API[status] || String(status).toLowerCase() }, authToken)
+      .then(() => setBackendOk(true))
+      .catch((err) => { console.warn("Sahayam: failed to sync status update.", err); setBackendOk(false); });
+  }, [authToken]);
+
+  // Admin action: assign a specific volunteer to a request.
+  const assignRequest = useCallback((id, volunteerId) => {
+    const vol = volunteers.find(v => v.id === volunteerId);
+    setRequests(rs => rs.map(r => r.id === id ? { ...r, assignedTo: vol ? vol.name : r.assignedTo, status: "Assigned" } : r));
+    if (typeof id !== "number" || !authToken) return;
+    patchRequestOnBackend(id, { status: "assigned", assigned_to: vol ? vol.name : null }, authToken)
+      .then(() => setBackendOk(true))
+      .catch((err) => { console.warn("Sahayam: failed to sync assignment.", err); setBackendOk(false); });
+  }, [authToken, volunteers]);
+
+  // Volunteer action: self-claim an unclaimed request.
+  const claimRequest = useCallback(async (id) => {
+    if (!currentUser || currentUser.role !== "volunteer") return { ok: false, error: "Not signed in as a volunteer" };
+    setRequests(rs => rs.map(r => r.id === id ? { ...r, assignedTo: currentUser.name, status: "Assigned" } : r));
+    if (typeof id !== "number" || !authToken) return { ok: true };
+    try {
+      const saved = await claimRequestOnBackend(id, authToken);
+      setRequests(rs => rs.map(r => r.id === id ? apiToUi(saved) : r));
+      setBackendOk(true);
+      return { ok: true };
+    } catch (err) {
+      console.warn("Sahayam: claim failed.", err);
+      return { ok: false, error: err.message };
+    }
+  }, [authToken, currentUser]);
+
+  // Poll computed hotspot clusters (real DBSCAN output from the backend)
+  // for the map overlay.
+  useEffect(() => {
+    let cancelled = false;
+    const load = () => fetchHotspots().then(h => { if (!cancelled) setHotspots(h); }).catch(() => {});
+    load();
+    const t = setInterval(load, 8000);
+    return () => { cancelled = true; clearInterval(t); };
+  }, []);
+
+  const setZoneSeverity = useCallback((districtId, severity) => {
+    setZones(zs => zs.map(z => z.id === districtId ? { ...z, severity } : z));
+  }, []);
+
+  const addMyReportId = useCallback((id) => {
+    setMyReportIds(ids => {
+      const next = [id, ...ids].slice(0, 20);
+      saveLocal("sahayam_my_reports", next);
+      return next;
+    });
+  }, []);
+
+  const value = {
+    requests, zones, zoneSeverity, volunteers, hotspots, view, network, selectedDistrictId, tick, myReportIds, backendOk,
+    authToken, currentUser, authError, authBusy, login, logout, continueOffline,
+    setView, setNetwork, setSelectedDistrictId,
+    addRequest, updateStatus, assignRequest, claimRequest, setZoneSeverity, addMyReportId,
+  };
+  return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
+}
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+function Header() {
+  const { view, setView, network, setNetwork, tick, backendOk, currentUser, logout } = useApp();
+  return (
+    <>
+      <header className="header">
+        <div className="brand">
+          <div className="brand-mark">S</div>
+          <div className="brand-text">
+            <b>Sahayam Ops</b>
+            <span>KERALA FLOOD RESPONSE</span>
+          </div>
+        </div>
+
+        <div className="view-tabs">
+          <button className={"view-tab" + (view === "citizen" ? " active" : "")} onClick={() => setView("citizen")}>
+            <IconLifeBuoy size={14} /> Need Help
+          </button>
+          <button className={"view-tab" + (view === "admin" ? " active" : "")} onClick={() => setView("admin")}>
+            <IconShield size={14} /> Admin
+          </button>
+          <button className={"view-tab" + (view === "volunteer" ? " active" : "")} onClick={() => setView("volunteer")}>
+            <IconNavigation size={14} /> Volunteer
+          </button>
+        </div>
+
+        <div className="header-spacer" />
+
+        <div
+          className={"net-toggle" + (network === "sms" ? " sms" : "")}
+          onClick={() => setNetwork(network === "online" ? "sms" : "online")}
+          role="button" tabIndex={0}
+          aria-label="Toggle network status"
+        >
+          <span className={"net-dot " + (network === "sms" ? "sms" : "online")} />
+          <span className="net-label">{network === "sms" ? "SMS Fallback" : "Online"}</span>
+          <span className="net-switch" />
+        </div>
+
+        <span
+          className="mono"
+          title={backendOk === false ? "Backend unreachable — showing local demo data" : "Connected to the FastAPI backend"}
+          style={{
+            display: "flex", alignItems: "center", gap: 5, fontSize: 10.5, letterSpacing: ".03em",
+            color: backendOk === false ? "var(--critical)" : backendOk ? "var(--low)" : "var(--text-faint)",
+          }}
+        >
+          <span style={{
+            width: 6, height: 6, borderRadius: "50%",
+            background: backendOk === false ? "var(--critical)" : backendOk ? "var(--low)" : "var(--text-faint)",
+          }} />
+          {backendOk === false ? "API OFFLINE" : backendOk ? "API LIVE" : "API..."}
+        </span>
+
+        <span className="clock mono">{fmtClock(tick)}</span>
+
+        {currentUser && (
+          <div className="user-chip" title={currentUser.role === "volunteer" ? "Base: " + (nearestDistrict(currentUser.lat, currentUser.lng).name) : "Signed in"}>
+            {currentUser.role === "admin" ? <IconShield size={12} /> : <IconNavigation size={12} />}
+            <span>{currentUser.name}</span>
+            <button className="user-chip-logout" onClick={logout} aria-label="Log out" title="Log out">
+              <IconLogOut size={12} />
+            </button>
+          </div>
+        )}
+      </header>
+
+      {network === "sms" && (
+        <div className="sms-banner">
+          <IconRadio size={14} />
+          <span>Live network unavailable &mdash; requests are queuing as simulated SMS payloads</span>
+          <span className="mono">channel=sms</span>
+        </div>
+      )}
+    </>
+  );
+}
+
+/* ============================================================
+   LOGIN GATE &mdash; admin + volunteer sign-in
+   ============================================================ */
+function LoginForm({ role }) {
+  const { login, logout, authError, authBusy, backendOk, continueOffline } = useApp();
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+
+  const submit = async (e) => {
+    e.preventDefault();
+    if (!username.trim() || !password || authBusy) return;
+    const ok = await login(username.trim(), password);
+    if (ok) { setUsername(""); setPassword(""); }
+  };
+
+  const roleLabel = role === "admin" ? "Admin" : "Volunteer";
+
+  return (
+    <div className="login-shell">
+      <div className="card">
+        <div className="login-icon"><IconLock size={20} /></div>
+        <h2>{roleLabel} sign-in</h2>
+        <p className="sub">Requests are open to everyone &mdash; the {roleLabel.toLowerCase()} console requires an account.</p>
+        {authError && <div className="login-error">{authError}</div>}
+        <form onSubmit={submit}>
+          <div className="field">
+            <label htmlFor="login-user">Username</label>
+            <input id="login-user" value={username} onChange={e => setUsername(e.target.value)} placeholder={role === "admin" ? "admin" : "arjun"} autoComplete="username" />
+          </div>
+          <div className="field">
+            <label htmlFor="login-pass">Password</label>
+            <input id="login-pass" type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" autoComplete="current-password" />
+          </div>
+          <button type="submit" className="btn btn-primary btn-block" disabled={authBusy || !username.trim() || !password}>
+            <IconUser size={14} /> {authBusy ? "Signing in..." : "Sign in"}
+          </button>
+        </form>
+        {backendOk === false && (
+          <button className="btn btn-ghost btn-block" style={{ marginTop: 10 }} onClick={() => continueOffline(role === "admin" ? "admin" : "volunteer")}>
+            Continue in offline demo mode
+          </button>
+        )}
+        <div className="login-hint">
+          Demo accounts: <b>admin / admin123</b> for Admin, or <b>arjun / divya / rahul</b> (password <b>volunteer123</b>) for Volunteer.
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   KERALA MAP
+   ============================================================ */
+function KeralaMap({ interactive = true, markerScope = "admin", pinMode = false, pinLatLng = null, onPick, mapId, showHotspots = true }) {
+  const { zoneSeverity, requests, hotspots, selectedDistrictId, setSelectedDistrictId } = useApp();
+  const svgRef = useRef(null);
+  const districtPathRefs = useRef({});
+  const [zoomBox, setZoomBox] = useState({ scale: 1, tx: 0, ty: 0 });
+  const maxHotspotSize = hotspots.length ? Math.max(...hotspots.map(h => h.size)) : 1;
+
+  const scopedRequests = markerScope === "volunteer" || markerScope === "citizen"
+    ? requests.filter(r => r.status !== "Resolved")
+    : requests;
+
+  const handleBgClick = (e) => {
+    if (!pinMode || !onPick) return;
+    const svg = svgRef.current;
+    const pt = svg.createSVGPoint();
+    pt.x = e.clientX; pt.y = e.clientY;
+    const loc = pt.matrixTransform(svg.getScreenCTM().inverse());
+    const [lat, lng] = unproject(loc.x, loc.y);
+    onPick(lat, lng);
+  };
+
+  const pinXY = pinLatLng ? project(pinLatLng[0], pinLatLng[1]) : null;
+
+  // Click-to-zoom: when an admin/volunteer map has a selected district, compute a
+  // tight bounding box around its shape (via native getBBox) and zoom the map's
+  // content group into it. Non-interactive / pin-picker maps never zoom.
+  useEffect(() => {
+    if (!interactive) return;
+    if (!selectedDistrictId) {
+      setZoomBox({ scale: 1, tx: 0, ty: 0 });
+      return;
+    }
+    const el = districtPathRefs.current[selectedDistrictId];
+    if (!el) return;
+    let bbox;
+    try { bbox = el.getBBox(); } catch (err) { return; }
+    if (!bbox || bbox.width === 0 || bbox.height === 0) return;
+    const padX = bbox.width * 0.18;
+    const padY = bbox.height * 0.18;
+    const bx = bbox.x - padX, by = bbox.y - padY;
+    const bw = bbox.width + padX * 2, bh = bbox.height + padY * 2;
+    const scale = Math.max(1, Math.min(KERALA_VB.w / bw, KERALA_VB.h / bh, 7));
+    const cx = bx + bw / 2, cy = by + bh / 2;
+    const tx = KERALA_VB.w / 2 - cx * scale;
+    const ty = KERALA_VB.h / 2 - cy * scale;
+    setZoomBox({ scale, tx, ty });
+  }, [selectedDistrictId, interactive]);
+
+  const zoomed = interactive && zoomBox.scale > 1.01;
+  const invScale = 1 / zoomBox.scale;
+
+  return (
+    <div className="card">
+      <div className="card-head">
+        <IconMap size={15} />
+        <h3>{pinMode ? "Tap your location" : "Affected Districts"}</h3>
+        <span className="sub">{pinMode ? "precise pin for your request" : "click a district to filter"}</span>
+        <div className="card-head-spacer" />
+        {interactive && selectedDistrictId && (
+          <button className="map-filter-chip" onClick={() => setSelectedDistrictId(null)}>
+            {zoomed && <>Zoomed &mdash; </>}{districtById[selectedDistrictId].name} &#x2715;
+          </button>
+        )}
+      </div>
+      <div className="map-wrap">
+        <svg ref={svgRef} className={"map-svg" + (pinMode ? " pickable" : "")}
+             viewBox={`0 0 ${KERALA_VB.w} ${KERALA_VB.h}`} xmlns="http://www.w3.org/2000/svg"
+             onClick={handleBgClick}>
+          <defs>
+            <pattern id={"water-" + mapId} width="10" height="5" patternUnits="userSpaceOnUse">
+              <path d="M0 3 Q2.5 0 5 3 T10 3" stroke="var(--border-soft)" strokeWidth="0.7" fill="none" />
+            </pattern>
+          </defs>
+          <rect x="0" y="0" width={KERALA_VB.w} height={KERALA_VB.h} fill={"url(#water-" + mapId + ")"} opacity="0.35" />
+
+          <g className="map-zoom-group"
+             style={{ transform: `matrix(${zoomBox.scale},0,0,${zoomBox.scale},${zoomBox.tx},${zoomBox.ty})` }}>
+
+          {KERALA_DISTRICTS.map(d => {
+            const severity = zoneSeverity[d.id] || d.severity;
+            const dimmed = interactive && selectedDistrictId && selectedDistrictId !== d.id;
+            return (
+              <g key={d.id}>
+                <path
+                  ref={el => { districtPathRefs.current[d.id] = el; }}
+                  d={d.d}
+                  className={"district-shape" + (dimmed ? " dimmed" : "") + (interactive ? "" : " static")}
+                  fill={SEVERITY_COLOR[severity]}
+                  fillOpacity={0.5}
+                  style={zoomed ? { strokeWidth: 1.1 * invScale } : undefined}
+                  onClick={interactive ? () => setSelectedDistrictId(selectedDistrictId === d.id ? null : d.id) : undefined}
+                />
+                {(!zoomed || selectedDistrictId === d.id) && (
+                  <text x={d.cx} y={d.cy - 1.5} textAnchor="middle" className="district-label"
+                        style={zoomed ? { transform: `scale(${invScale})`, transformOrigin: `${d.cx}px ${d.cy - 1.5}px` } : undefined}>
+                    {d.name}
+                  </text>
+                )}
+              </g>
+            );
+          })}
+
+          {showHotspots && hotspots.map(h => {
+            const [x, y] = project(h.center_lat, h.center_lng);
+            const r = 10 + 9 * (h.size / maxHotspotSize);
+            return (
+              <g key={"hotspot-" + h.cluster_id} className="hotspot-cluster">
+                <circle className="hotspot-ring" cx={x} cy={y} r={r} style={zoomed ? { strokeWidth: 1 * invScale } : undefined} />
+                <circle cx={x} cy={y} r={r} fill="var(--critical)" fillOpacity={0.16} stroke="var(--critical)" strokeOpacity={0.55}
+                        strokeWidth={zoomed ? invScale : 1} strokeDasharray={zoomed ? `${2.5 * invScale} ${2 * invScale}` : "2.5 2"} />
+                <text x={x} y={y + r + 8} textAnchor="middle" className="hotspot-label"
+                      style={zoomed ? { transform: `scale(${invScale})`, transformOrigin: `${x}px ${y + r + 8}px` } : undefined}>
+                  {h.size} reports clustered
+                </text>
+              </g>
+            );
+          })}
+
+          {scopedRequests.map(r => {
+            const [x, y] = project(r.lat, r.lng);
+            const dimmed = interactive && selectedDistrictId && selectedDistrictId !== r.districtId;
+            const small = markerScope === "citizen";
+            return (
+              <g key={r.id} className={"req-marker" + (interactive ? "" : " static")}
+                 transform={`translate(${x},${y})`}
+                 opacity={dimmed ? 0.18 : (small ? 0.85 : 1)}
+                 onClick={interactive ? () => setSelectedDistrictId(r.districtId) : undefined}>
+                {r.priority === "Emergency" && <circle className="pulse" r={small ? 3.2 : 4.2} fill={PRI_COLOR[r.priority]} />}
+                <circle r={small ? 3.2 : 4.2} fill={PRI_COLOR[r.priority]} stroke="var(--bg)" strokeWidth={zoomed ? 1.1 * invScale : 1.1} />
+              </g>
+            );
+          })}
+
+          {pinMode && pinXY && (
+            <g className="pin-marker" transform={`translate(${pinXY[0]},${pinXY[1]})`}>
+              <circle className="pulse" r="6" fill="var(--accent)" />
+              <circle r="6" fill="var(--accent)" stroke="var(--bg)" strokeWidth="1.6" />
+              <circle r="2.2" fill="var(--bg)" />
+            </g>
+          )}
+          </g>
+        </svg>
+      </div>
+      <div className="legend">
+        {SEVERITY_LIST.map(s => (
+          <span key={s} className="legend-item">
+            <span className="legend-swatch" style={{ background: SEVERITY_COLOR[s], opacity: 0.7 }} /> {s}
+          </span>
+        ))}
+        {!pinMode && PRIORITIES.map(p => (
+          <span key={p} className="legend-item">
+            <span className="legend-swatch" style={{ background: PRI_COLOR[p], borderRadius: "50%" }} /> {p}
+          </span>
+        ))}
+        {showHotspots && hotspots.length > 0 && (
+          <span className="legend-item">
+            <span className="legend-swatch" style={{ background: "transparent", border: "1.5px dashed var(--critical)", borderRadius: "50%" }} />
+            ML-detected hotspot ({hotspots.length})
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   ADMIN &mdash; metrics
+   ============================================================ */
+function MetricTile({ icon, num, label, color }) {
+  return (
+    <div className="metric">
+      <div className="icon-wrap" style={{ background: `color-mix(in srgb, ${color} 18%, transparent)`, color }}>
+        {icon}
+      </div>
+      <div className="num">{num}</div>
+      <div className="label">{label}</div>
+    </div>
+  );
+}
+
+function AdminMetrics() {
+  const { requests, volunteers } = useApp();
+  const total = requests.length;
+  const resolved = requests.filter(r => r.status === "Resolved").length;
+  const active = volunteers.length;
+  const smsCount = requests.filter(r => r.channel === "sms").length;
+  return (
+    <div className="metrics">
+      <MetricTile icon={<IconInbox size={16} />} num={total} label="Total requests" color="var(--accent)" />
+      <MetricTile icon={<IconCheckCircle size={16} />} num={resolved} label="Resolved" color="var(--low)" />
+      <MetricTile icon={<IconUsers size={16} />} num={active} label="Active volunteers" color="var(--sms)" />
+      <MetricTile icon={<IconRadio size={16} />} num={smsCount} label="SMS-ingested" color="var(--high)" />
+    </div>
+  );
+}
+
+/* ============================================================
+   ADMIN &mdash; priority queue
+   ============================================================ */
+function PriorityQueue() {
+  const { requests, volunteers, selectedDistrictId, tick, assignRequest, updateStatus } = useApp();
+  const filtered = useMemo(() => {
+    let rs = requests;
+    if (selectedDistrictId) rs = rs.filter(r => r.districtId === selectedDistrictId);
+    return [...rs].sort((a, b) => {
+      if (a.status === "Resolved" && b.status !== "Resolved") return 1;
+      if (b.status === "Resolved" && a.status !== "Resolved") return -1;
+      const pr = PRI_RANK[a.priority] - PRI_RANK[b.priority];
+      if (pr !== 0) return pr;
+      return a.createdAt - b.createdAt;
+    });
+  }, [requests, selectedDistrictId]);
+
+  return (
+    <div className="card">
+      <div className="card-head">
+        <IconLayers size={15} />
+        <h3>Live Request Queue</h3>
+        <span className="sub">{filtered.length} &middot; priority order</span>
+      </div>
+      <div className="card-body">
+        {filtered.length === 0 ? (
+          <div className="empty-state">
+            <IconCheckCircle size={28} />
+            <p>No requests in this district.</p>
+          </div>
+        ) : (
+          <div className="queue-list">
+            {filtered.map(r => {
+              const d = districtById[r.districtId];
+              const vol = volunteers.find(v => v.name === r.assignedTo);
+              return (
+                <div key={r.id} className="req-row">
+                  <div className="pri-stripe" style={{ background: PRI_COLOR[r.priority] }} />
+                  <div className="req-row-body">
+                    <div className="req-row-top">
+                      <span className="pri-pill" style={{ background: PRI_BG[r.priority], color: PRI_COLOR[r.priority] }}>{r.priority}</span>
+                      <span className="req-row-title">{r.name || "Unnamed reporter"}</span>
+                      <span className="status-pill">{r.status}</span>
+                    </div>
+                    <div className="req-row-desc">{r.desc}</div>
+                    <div className="req-row-meta">
+                      <span><IconMapPin size={11} style={{ verticalAlign: "-2px" }} /> {d.name}</span>
+                      <span className="mono">{r.lat.toFixed(3)}, {r.lng.toFixed(3)}</span>
+                      <span className="mono">{r.id}</span>
+                      <span className="channel-tag mono">{r.channel === "sms" ? <IconRadio size={11} /> : <IconWifi size={11} />} {r.channel}</span>
+                      <span className="mono">{relTime(r.createdAt, tick)}</span>
+                      {vol && <span>&rarr; {vol.name}</span>}
+                    </div>
+                    {r.status === "Pending" && (
+                      <div style={{ marginTop: 8, display: "flex", gap: 6, flexWrap: "wrap" }}>
+                        {volunteers.map(v => (
+                          <button key={v.id} className="btn btn-ghost btn-sm" onClick={() => assignRequest(r.id, v.id)}>
+                            Assign {v.name.split(" ")[0]}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                    {r.status !== "Resolved" && r.status !== "Pending" && (
+                      <div style={{ marginTop: 8 }}>
+                        <button className="btn btn-ghost btn-sm" onClick={() => updateStatus(r.id, "Resolved")}>
+                          <IconCheck size={12} /> Mark resolved
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   ADMIN &mdash; manual injection
+   ============================================================ */
+function InjectionPanel() {
+  const { addRequest, network } = useApp();
+  const sortedDistricts = useMemo(() => [...KERALA_DISTRICTS].sort((a, b) => a.name.localeCompare(b.name)), []);
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [desc, setDesc] = useState("");
+  const [districtId, setDistrictId] = useState(sortedDistricts[0].id);
+  const [elderly, setElderly] = useState(false);
+  const [children, setChildren] = useState(false);
+  const [medical, setMedical] = useState(false);
+  const [lastAdded, setLastAdded] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  const submit = async (e) => {
+    e.preventDefault();
+    if (!name.trim() || !desc.trim() || !phone.trim() || submitting) return;
+    setSubmitting(true);
+    const req = await addRequest({
+      name: name.trim(), phone: phone.trim(), desc: desc.trim(), districtId, category: "general",
+      has_elderly: elderly, has_children: children, has_medical: medical,
+    });
+    setSubmitting(false);
+    setLastAdded(req);
+    setName(""); setPhone(""); setDesc(""); setElderly(false); setChildren(false); setMedical(false);
+  };
+
+  return (
+    <div className="card">
+      <div className="card-head">
+        <IconSend size={15} />
+        <h3>Manual Request Injection</h3>
+        <span className="sub">{network === "sms" ? "will ingest via SMS" : "direct entry"}</span>
+      </div>
+      <div className="card-body">
+        <form onSubmit={submit}>
+          <div className="field-row">
+            <div className="field">
+              <label htmlFor="inj-name">Reporter name</label>
+              <input id="inj-name" value={name} onChange={e => setName(e.target.value)} placeholder="Full name" />
+            </div>
+            <div className="field">
+              <label htmlFor="inj-phone">Phone</label>
+              <input id="inj-phone" value={phone} onChange={e => setPhone(e.target.value)} placeholder="98470 00000" />
+            </div>
+          </div>
+          <div className="field">
+            <label htmlFor="inj-desc">Situation description</label>
+            <textarea id="inj-desc" rows="3" value={desc} onChange={e => setDesc(e.target.value)} placeholder="What is happening, who needs help..." />
+          </div>
+          <div className="field">
+            <label htmlFor="inj-district">District</label>
+            <select id="inj-district" value={districtId} onChange={e => setDistrictId(e.target.value)}>
+              {sortedDistricts.map(d => <option key={d.id} value={d.id}>{d.name} &mdash; {d.note}</option>)}
+            </select>
+          </div>
+          <div className="field">
+            <label>Vulnerability flags (fed into the ML triage engine)</label>
+            <div className="pri-select">
+              <div className={"pri-opt" + (elderly ? " active" : "")} onClick={() => setElderly(v => !v)}>Elderly</div>
+              <div className={"pri-opt" + (children ? " active" : "")} onClick={() => setChildren(v => !v)}>Children</div>
+              <div className={"pri-opt" + (medical ? " active" : "")} onClick={() => setMedical(v => !v)}>Medical need</div>
+            </div>
+          </div>
+          <button type="submit" className="btn btn-primary btn-block" disabled={submitting}>
+            <IconSend size={14} /> {submitting ? "Submitting..." : "Inject request"}
+          </button>
+        </form>
+        {lastAdded && (
+          <div style={{ marginTop: 12, fontSize: 11.5, color: "var(--text-faint)" }} className="mono">
+            Logged {lastAdded.id} &middot; ML triage: <span style={{ color: PRI_COLOR[lastAdded.priority] }}>{lastAdded.priority}</span>
+            {lastAdded.mlScore != null ? ` (score ${lastAdded.mlScore})` : ""} at {new Date(lastAdded.createdAt).toLocaleTimeString('en-IN', { hour12: false })}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   ADMIN &mdash; district management
+   ============================================================ */
+function ZoneManagementPanel() {
+  const { zoneSeverity, requests, setZoneSeverity, selectedDistrictId, setSelectedDistrictId } = useApp();
+  const sortedDistricts = useMemo(() => [...KERALA_DISTRICTS].sort((a, b) => a.name.localeCompare(b.name)), []);
+  return (
+    <div className="card">
+      <div className="card-head">
+        <IconAlert size={15} />
+        <h3>Affected Area Management</h3>
+        <span className="sub">set threat level</span>
+      </div>
+      <div className="card-body zone-mgmt-list">
+        {sortedDistricts.map(d => {
+          const severity = zoneSeverity[d.id] || d.severity;
+          const count = requests.filter(r => r.districtId === d.id && r.status !== "Resolved").length;
+          return (
+            <div key={d.id} className="zone-mgmt-row">
+              <span className="zone-mgmt-dot" style={{ background: SEVERITY_COLOR[severity] }} />
+              <span className="zone-mgmt-name"
+                    onClick={() => setSelectedDistrictId(selectedDistrictId === d.id ? null : d.id)}>
+                {d.name}
+              </span>
+              <span className="zone-mgmt-count">{count} open</span>
+              <select className="sev-select" value={severity} onChange={e => setZoneSeverity(d.id, e.target.value)}>
+                {SEVERITY_LIST.map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   ADMIN DASHBOARD
+   ============================================================ */
+function AdminDashboard() {
+  const { currentUser } = useApp();
+  if (!currentUser || currentUser.role !== "admin") return <LoginForm role="admin" />;
+  return (
+    <div className="main">
+      <AdminMetrics />
+      <div className="admin-grid">
+        <KeralaMap interactive={true} markerScope="admin" mapId="admin" />
+        <PriorityQueue />
+      </div>
+      <div className="admin-grid-lower">
+        <InjectionPanel />
+        <ZoneManagementPanel />
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   VOLUNTEER DASHBOARD
+   ============================================================ */
+function StatusSteps({ req }) {
+  const { updateStatus } = useApp();
+  const currentIdx = STATUS_FLOW.indexOf(req.status);
+  return (
+    <div className="status-steps">
+      {STATUS_FLOW.map((s, i) => {
+        const done = i < currentIdx || (req.status === "Resolved" && i <= currentIdx);
+        const isCurrent = i === currentIdx;
+        const clickable = i === currentIdx + 1;
+        return (
+          <button
+            key={s}
+            className={"status-step" + (i <= currentIdx ? " done" : "") + (isCurrent ? " current" : "")}
+            disabled={!clickable}
+            onClick={() => clickable && updateStatus(req.id, s)}
+          >
+            {i <= currentIdx ? <IconCheck size={11} style={{ verticalAlign: "-2px" }} /> : null} {s}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function TaskCard({ req, volXY }) {
+  const { tick } = useApp();
+  const d = districtById[req.districtId];
+  const reqXY = project(req.lat, req.lng);
+  const km = dist(volXY, reqXY) * KM_PER_UNIT;
+  return (
+    <div className="task-card">
+      <div className="task-top">
+        <div className="task-pri-badge" style={{ background: PRI_BG[req.priority], color: PRI_COLOR[req.priority] }}>
+          <IconAlert size={17} />
+        </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div className="task-title">{req.name || "Unnamed reporter"}</div>
+          <div className="task-loc"><IconMapPin size={11} /> {d.name} &middot; {km.toFixed(1)} km away</div>
+        </div>
+        <span className="pri-pill" style={{ background: PRI_BG[req.priority], color: PRI_COLOR[req.priority] }}>{req.priority}</span>
+      </div>
+      <div className="task-desc">{req.desc}</div>
+      <div className="task-meta-row">
+        <span className="task-meta mono"><IconClock size={11} /> {relTime(req.createdAt, tick)}</span>
+        <span className="task-meta mono"><IconPhone size={11} /> {req.phone || "n/a"}</span>
+        <span className="task-meta mono">{req.id}</span>
+      </div>
+      {req.status === "Resolved" ? (
+        <div className="status-pill" style={{ background: "var(--low-bg)", color: "var(--low)", borderColor: "transparent" }}>
+          <IconCheck size={11} style={{ verticalAlign: "-1px" }} /> Resolved
+        </div>
+      ) : (
+        <StatusSteps req={req} />
+      )}
+    </div>
+  );
+}
+
+function SmsPayloadCard({ req }) {
+  const p = makeSmsPayload(req);
+  const { tick } = useApp();
+  return (
+    <div className="sms-payload-card">
+      <div className="sms-payload-head"><IconRadio size={14} /> SMS PAYLOAD &middot; {relTime(req.createdAt, tick)}</div>
+      <div className="sms-json mono">
+        {"{"}<br />
+        &nbsp;&nbsp;<span className="k">"phone"</span>: <span className="v">"{p.phone}"</span>,<br />
+        &nbsp;&nbsp;<span className="k">"lat"</span>: <span className="v">{p.lat}</span>,<br />
+        &nbsp;&nbsp;<span className="k">"lng"</span>: <span className="v">{p.lng}</span>,<br />
+        &nbsp;&nbsp;<span className="k">"payload"</span>: <span className="v">"{p.payload}"</span>,<br />
+        &nbsp;&nbsp;<span className="k">"timestamp"</span>: <span className="v">{p.timestamp}</span><br />
+        {"}"}
+      </div>
+      <div className="sms-actions">
+        <StatusSteps req={req} />
+      </div>
+    </div>
+  );
+}
+
+function ClaimCard({ req, volXY, onClaim, claiming }) {
+  const { tick } = useApp();
+  const d = districtById[req.districtId];
+  const reqXY = project(req.lat, req.lng);
+  const km = dist(volXY, reqXY) * KM_PER_UNIT;
+  return (
+    <div className="task-card">
+      <div className="task-top">
+        <div className="task-pri-badge" style={{ background: PRI_BG[req.priority], color: PRI_COLOR[req.priority] }}>
+          <IconAlert size={17} />
+        </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div className="task-title">{req.name || "Unnamed reporter"}</div>
+          <div className="task-loc"><IconMapPin size={11} /> {d.name} &middot; {km.toFixed(1)} km away</div>
+        </div>
+        <span className="pri-pill" style={{ background: PRI_BG[req.priority], color: PRI_COLOR[req.priority] }}>{req.priority}</span>
+      </div>
+      <div className="task-desc">{req.desc}</div>
+      <div className="task-meta-row">
+        <span className="task-meta mono"><IconClock size={11} /> {relTime(req.createdAt, tick)}</span>
+        <span className="task-meta mono">{req.id}</span>
+      </div>
+      <button className="btn btn-primary btn-block" style={{ marginTop: 10 }} onClick={onClaim} disabled={claiming}>
+        <IconCheck size={14} /> {claiming ? "Claiming..." : "Claim this request"}
+      </button>
+    </div>
+  );
+}
+
+function VolunteerDashboard() {
+  const { requests, currentUser, network, selectedDistrictId, setSelectedDistrictId, tick, claimRequest } = useApp();
+  const [claimingId, setClaimingId] = useState(null);
+  const [claimError, setClaimError] = useState(null);
+
+  const vol = currentUser && currentUser.role === "volunteer" ? currentUser : null;
+  const volXY = vol ? project(vol.lat, vol.lng) : [0, 0];
+
+  const myTasks = useMemo(() => {
+    if (!vol) return [];
+    let mine = requests.filter(r => r.assignedTo === vol.name);
+    if (selectedDistrictId) mine = mine.filter(r => r.districtId === selectedDistrictId);
+    return mine.sort((a, b) => {
+      if ((a.status === "Resolved") !== (b.status === "Resolved")) return a.status === "Resolved" ? 1 : -1;
+      const dA = dist(volXY, project(a.lat, a.lng));
+      const dB = dist(volXY, project(b.lat, b.lng));
+      return dA - dB;
+    });
+  }, [requests, vol, selectedDistrictId, volXY]);
+
+  const nearby = useMemo(() => {
+    if (!vol) return [];
+    let open = requests.filter(r => !r.assignedTo && r.status === "Pending");
+    if (selectedDistrictId) open = open.filter(r => r.districtId === selectedDistrictId);
+    return open.sort((a, b) => {
+      const dA = dist(volXY, project(a.lat, a.lng));
+      const dB = dist(volXY, project(b.lat, b.lng));
+      return dA - dB;
+    });
+  }, [requests, vol, selectedDistrictId, volXY]);
+
+  if (!vol) return <LoginForm role="volunteer" />;
+
+  const activeCount = myTasks.filter(r => r.status !== "Resolved").length;
+  const resolvedCount = myTasks.filter(r => r.status === "Resolved").length;
+
+  const handleClaim = async (id) => {
+    setClaimingId(id); setClaimError(null);
+    const res = await claimRequest(id);
+    setClaimingId(null);
+    if (!res.ok) setClaimError(res.error || "Could not claim this request &mdash; someone may have just taken it.");
+  };
+
+  return (
+    <div className="vshell">
+      <div className="card v-profile">
+        <div className="v-avatar">{vol.name.split(" ").map(n => n[0]).join("")}</div>
+        <div>
+          <div className="v-name">{vol.name}</div>
+          <div className="v-sub">Base: {nearestDistrict(vol.lat, vol.lng).name}</div>
+        </div>
+      </div>
+
+      <div className="v-stats">
+        <div className="v-stat"><div className="n">{activeCount}</div><div className="l">ACTIVE</div></div>
+        <div className="v-stat"><div className="n">{resolvedCount}</div><div className="l">RESOLVED</div></div>
+        <div className="v-stat"><div className="n mono">{fmtClock(tick).slice(0, 5)}</div><div className="l">LOCAL TIME</div></div>
+      </div>
+
+      <KeralaMap interactive={true} markerScope="volunteer" mapId="vol" />
+
+      {selectedDistrictId && (
+        <div className="filter-banner" style={{ marginTop: 14 }}>
+          <IconMapPin size={14} />
+          Showing requests in {districtById[selectedDistrictId].name}
+          <button className="btn btn-ghost btn-sm" style={{ marginLeft: "auto" }} onClick={() => setSelectedDistrictId(null)}>Clear</button>
+        </div>
+      )}
+
+      <div className="section-title">
+        <h3>Nearby Requests</h3>
+        {nearby.length > 0 && <span className="badge-count">{nearby.length}</span>}
+      </div>
+      <p style={{ fontSize: 11.5, color: "var(--text-faint)", margin: "-8px 0 12px" }}>Unclaimed requests, closest to your base first &mdash; pick which one you'll attend to.</p>
+      {claimError && <div className="login-error">{claimError}</div>}
+      {nearby.length === 0 ? (
+        <div className="empty-state card">
+          <IconCheckCircle size={28} />
+          <p>No unclaimed requests right now{selectedDistrictId ? " in this district" : ""}.</p>
+        </div>
+      ) : (
+        nearby.map(r => (
+          <ClaimCard key={r.id} req={r} volXY={volXY} claiming={claimingId === r.id} onClaim={() => handleClaim(r.id)} />
+        ))
+      )}
+
+      <div className="section-title" style={{ marginTop: 22 }}>
+        <h3>My Tasks</h3>
+        {activeCount > 0 && <span className="badge-count">{activeCount}</span>}
+      </div>
+
+      {myTasks.length === 0 ? (
+        <div className="empty-state card">
+          <IconInbox size={28} />
+          <p>Claim a request above to get started.</p>
+        </div>
+      ) : network === "sms" ? (
+        myTasks.map(r => <SmsPayloadCard key={r.id} req={r} />)
+      ) : (
+        myTasks.map(r => <TaskCard key={r.id} req={r} volXY={volXY} />)
+      )}
+    </div>
+  );
+}
+
+/* ============================================================
+   CITIZEN VIEW
+   ============================================================ */
+function ConfirmPanel({ req, onDismiss }) {
+  const { requests } = useApp();
+  const position = useMemo(() => {
+    const open = requests.filter(r => r.status !== "Resolved").sort((a, b) => {
+      const pr = PRI_RANK[a.priority] - PRI_RANK[b.priority];
+      if (pr !== 0) return pr;
+      return a.createdAt - b.createdAt;
+    });
+    return open.findIndex(r => r.id === req.id) + 1;
+  }, [requests, req.id]);
+  const d = districtById[req.districtId];
+
+  return (
+    <div className="card confirm-panel">
+      <span className="pri-pill" style={{ background: PRI_BG[req.priority], color: PRI_COLOR[req.priority] }}>{req.priority}</span>
+      <h2>Help request logged</h2>
+      <p>Volunteers in {d.name} have been alerted. Keep your phone reachable.</p>
+      <div className="confirm-stat-row">
+        <div className="confirm-stat">
+          <div className="n mono">{req.id}</div>
+          <div className="l">REQUEST ID</div>
+        </div>
+        <div className="confirm-stat">
+          <div className="n">{position > 0 ? position : "-"}</div>
+          <div className="l">QUEUE POSITION</div>
+        </div>
+        <div className="confirm-stat">
+          <div className="n">{d.name}</div>
+          <div className="l">DISTRICT</div>
+        </div>
+      </div>
+      <button className="btn btn-ghost btn-block" onClick={onDismiss}>Report another request</button>
+    </div>
+  );
+}
+
+function CitizenApp() {
+  const { addRequest, requests, myReportIds, addMyReportId, tick } = useApp();
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [desc, setDesc] = useState("");
+  const [category, setCategory] = useState("rescue");
+  const [elderly, setElderly] = useState(false);
+  const [children, setChildren] = useState(false);
+  const [medical, setMedical] = useState(false);
+  const [pin, setPin] = useState(null);
+  const [pinIsGps, setPinIsGps] = useState(false);
+  const [geoStatus, setGeoStatus] = useState("idle"); // idle | locating | granted | denied | unsupported
+  const [confirmed, setConfirmed] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  const pinDistrict = pin ? nearestDistrict(pin.lat, pin.lng) : null;
+  const preview = useMemo(() => classifyUrgency(desc, { elderly, children, medical }), [desc, elderly, children, medical]);
+
+  const useMyLocation = useCallback(() => {
+    if (!("geolocation" in navigator)) { setGeoStatus("unsupported"); return; }
+    setGeoStatus("locating");
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setPin({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        setPinIsGps(true);
+        setGeoStatus("granted");
+      },
+      () => { setGeoStatus("denied"); },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+    );
+  }, []);
+
+  // Try to get the reporter's real location automatically as soon as the
+  // form opens; tapping the map below always still works as a fallback or
+  // to correct/refine the pin.
+  useEffect(() => { useMyLocation(); }, [useMyLocation]);
+
+  const submit = async (e) => {
+    e.preventDefault();
+    if (!desc.trim() || !pin || submitting) return;
+    setSubmitting(true);
+    const req = await addRequest({
+      name: name.trim() || null, phone: phone.trim() || null, desc: desc.trim(),
+      category, has_elderly: elderly, has_children: children, has_medical: medical,
+      lat: pin.lat, lng: pin.lng,
+    });
+    setSubmitting(false);
+    addMyReportId(req.id);
+    setConfirmed(req);
+    setName(""); setPhone(""); setDesc(""); setCategory("rescue");
+    setElderly(false); setChildren(false); setMedical(false); setPin(null); setPinIsGps(false); setGeoStatus("idle");
+  };
+
+  const myReports = useMemo(
+    () => myReportIds.map(id => requests.find(r => r.id === id)).filter(Boolean),
+    [myReportIds, requests]
+  );
+
+  if (confirmed) {
+    return (
+      <div className="cshell">
+        <ConfirmPanel req={confirmed} onDismiss={() => setConfirmed(null)} />
+        {myReports.length > 0 && (
+          <>
+            <div className="section-title" style={{ marginTop: 22 }}><h3>Your reports</h3></div>
+            {myReports.map(r => (
+              <div key={r.id} className="my-report-row">
+                <span className="pri-pill" style={{ background: PRI_BG[r.priority], color: PRI_COLOR[r.priority] }}>{r.priority}</span>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div className="desc">{r.desc}</div>
+                  <div className="meta mono">{r.id} &middot; {relTime(r.createdAt, tick)}</div>
+                </div>
+                <span className="status-pill">{r.status}</span>
+              </div>
+            ))}
+          </>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="cshell">
+      <div className="c-hero">
+        <h1>Need help right now?</h1>
+        <p>Tell us what is happening and tap your location on the map. Every report reaches a volunteer &mdash; the most urgent ones first.</p>
+      </div>
+
+      <form onSubmit={submit} className="stack">
+        <div style={{ marginBottom: 14 }}>
+          <div className={"pin-hint" + (pin ? " set" : "")}>
+            <IconMapPin size={15} />
+            <span style={{ flex: 1 }}>
+              {geoStatus === "locating" && !pin && "Finding your location..."}
+              {pin && pinIsGps && `Using your device location near ${pinDistrict.name} (${pin.lat.toFixed(4)}, ${pin.lng.toFixed(4)})`}
+              {pin && !pinIsGps && `Pinned near ${pinDistrict.name} (${pin.lat.toFixed(4)}, ${pin.lng.toFixed(4)})`}
+              {!pin && geoStatus !== "locating" && "Share your location, or tap the map below to mark exactly where help is needed"}
+            </span>
+            <button type="button" className="btn btn-ghost btn-sm" onClick={useMyLocation} disabled={geoStatus === "locating"}>
+              <IconNavigation size={12} /> {geoStatus === "locating" ? "Locating..." : "Use my location"}
+            </button>
+          </div>
+          {(geoStatus === "denied" || geoStatus === "unsupported") && !pin && (
+            <div className="geo-note">
+              {geoStatus === "denied" ? "Location access was denied or timed out." : "Your device doesn't support location sharing."} Tap the map below to mark your location instead.
+            </div>
+          )}
+          <KeralaMap interactive={false} markerScope="citizen" pinMode={true} pinLatLng={pin ? [pin.lat, pin.lng] : null}
+                     onPick={(lat, lng) => { setPin({ lat, lng }); setPinIsGps(false); }} mapId="citizen" />
+        </div>
+
+        <div className="field">
+          <label>What kind of help do you need?</label>
+          <div className="cat-grid">
+            {CATEGORIES.map(c => (
+              <div key={c.id} className={"cat-chip" + (category === c.id ? " active" : "")} onClick={() => setCategory(c.id)}>
+                <c.Icon size={17} />
+                {c.label}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="field">
+          <label htmlFor="c-desc">Describe the situation *</label>
+          <textarea id="c-desc" rows="4" required value={desc} onChange={e => setDesc(e.target.value)}
+                    placeholder="Who needs help, and what's happening? e.g. water rising fast, elderly parent alone upstairs." />
+        </div>
+
+        <div className="field">
+          <label>Does this involve anyone vulnerable?</label>
+          <div className="vuln-grid">
+            <div className={"vuln-chip" + (elderly ? " active" : "")} onClick={() => setElderly(v => !v)}>
+              {elderly ? <IconCheck size={13} /> : null} Elderly person
+            </div>
+            <div className={"vuln-chip" + (children ? " active" : "")} onClick={() => setChildren(v => !v)}>
+              {children ? <IconCheck size={13} /> : null} Children
+            </div>
+            <div className={"vuln-chip" + (medical ? " active" : "")} onClick={() => setMedical(v => !v)}>
+              {medical ? <IconCheck size={13} /> : null} Medical condition
+            </div>
+          </div>
+        </div>
+
+        <div className="field-row">
+          <div className="field">
+            <label htmlFor="c-name">Your name <span style={{ fontWeight: 500, color: "var(--text-faint)" }}>(optional)</span></label>
+            <input id="c-name" value={name} onChange={e => setName(e.target.value)} placeholder="Full name" />
+          </div>
+          <div className="field">
+            <label htmlFor="c-phone">Phone <span style={{ fontWeight: 500, color: "var(--text-faint)" }}>(optional)</span></label>
+            <input id="c-phone" value={phone} onChange={e => setPhone(e.target.value)} placeholder="98470 00000" />
+          </div>
+        </div>
+
+        {desc.trim() && (
+          <div className="mono" style={{ fontSize: 11, color: "var(--text-faint)", marginBottom: 10 }}>
+            Estimated priority: <span style={{ color: PRI_COLOR[preview.priority] }}>{preview.priority}</span> &middot; the backend's ML triage engine makes the final call
+          </div>
+        )}
+        <button type="submit" className="btn btn-primary btn-block" disabled={!desc.trim() || !pin || submitting}>
+          <IconSend size={14} /> {submitting ? "Sending..." : "Send help request"}
+        </button>
+      </form>
+
+      {myReports.length > 0 && (
+        <>
+          <div className="section-title" style={{ marginTop: 24 }}><h3>Your reports</h3></div>
+          {myReports.map(r => (
+            <div key={r.id} className="my-report-row">
+              <span className="pri-pill" style={{ background: PRI_BG[r.priority], color: PRI_COLOR[r.priority] }}>{r.priority}</span>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div className="desc">{r.desc}</div>
+                <div className="meta mono">{r.id} &middot; {relTime(r.createdAt, tick)}</div>
+              </div>
+              <span className="status-pill">{r.status}</span>
+            </div>
+          ))}
+        </>
+      )}
+    </div>
+  );
+}
+
+/* ============================================================
+   MOBILE VIEW BAR
+   ============================================================ */
+function ViewBarButtons() {
+  const { view, setView } = useApp();
+  return (
+    <>
+      <button className={view === "citizen" ? "active" : ""} onClick={() => setView("citizen")}>
+        <IconLifeBuoy size={17} /> Help
+      </button>
+      <button className={view === "admin" ? "active" : ""} onClick={() => setView("admin")}>
+        <IconShield size={17} /> Admin
+      </button>
+      <button className={view === "volunteer" ? "active" : ""} onClick={() => setView("volunteer")}>
+        <IconNavigation size={17} /> Volunteer
+      </button>
+    </>
+  );
+}
+
+/* ============================================================
+   ROOT
+   ============================================================ */
+function App() {
+  return (
+    <AppProvider>
+      <AppBody />
+    </AppProvider>
+  );
+}
+
+function AppBody() {
+  const { view } = useApp();
+  return (
+    <>
+      <Header />
+      {view === "citizen" && <CitizenApp />}
+      {view === "admin" && <AdminDashboard />}
+      {view === "volunteer" && <VolunteerDashboard />}
+      <div className="mobile-view-bar">
+        <ViewBarButtons />
+      </div>
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
